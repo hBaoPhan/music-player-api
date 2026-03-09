@@ -15,49 +15,43 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.musicplayer.entity.PlaylistSong;
-import com.example.musicplayer.repository.PlaylistSongRepository;
+import com.example.musicplayer.service.PlaylistSongService;
 
 @RestController
 @RequestMapping("/api/playlist-songs")
 public class PlaylistSongController {
     
     @Autowired
-    private PlaylistSongRepository playlistSongRepository;
+    private PlaylistSongService playlistSongService;
     
     @GetMapping
     public List<PlaylistSong> getAllPlaylistSongs() {
-        return playlistSongRepository.findAll();
+        return playlistSongService.getAllPlaylistSongs();
     }
     
     @GetMapping("/{id}")
     public ResponseEntity<PlaylistSong> getPlaylistSongById(@PathVariable Long id) {
-        return playlistSongRepository.findById(id)
+        return playlistSongService.getPlaylistSongById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
     
     @PostMapping
     public ResponseEntity<PlaylistSong> createPlaylistSong(@RequestBody PlaylistSong playlistSong) {
-        PlaylistSong savedPlaylistSong = playlistSongRepository.save(playlistSong);
+        PlaylistSong savedPlaylistSong = playlistSongService.createPlaylistSong(playlistSong);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedPlaylistSong);
     }
     
     @PutMapping("/{id}")
     public ResponseEntity<PlaylistSong> updatePlaylistSong(@PathVariable Long id, @RequestBody PlaylistSong playlistSongDetails) {
-        return playlistSongRepository.findById(id)
-                .map(playlistSong -> {
-                    playlistSong.setPlaylistId(playlistSongDetails.getPlaylistId());
-                    playlistSong.setSongId(playlistSongDetails.getSongId());
-                    playlistSong.setAddedAt(playlistSongDetails.getAddedAt());
-                    return ResponseEntity.ok(playlistSongRepository.save(playlistSong));
-                })
+        return playlistSongService.updatePlaylistSong(id, playlistSongDetails)
+                .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
     
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePlaylistSong(@PathVariable Long id) {
-        if (playlistSongRepository.existsById(id)) {
-            playlistSongRepository.deleteById(id);
+        if (playlistSongService.deletePlaylistSong(id)) {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.notFound().build();
@@ -65,12 +59,12 @@ public class PlaylistSongController {
     
     @GetMapping("/playlist/{playlistId}")
     public List<PlaylistSong> getPlaylistSongsByPlaylist(@PathVariable Long playlistId) {
-        return playlistSongRepository.findByPlaylistId(playlistId);
+        return playlistSongService.getPlaylistSongsByPlaylist(playlistId);
     }
     
     @DeleteMapping("/playlist/{playlistId}/song/{songId}")
     public ResponseEntity<Void> deletePlaylistSong(@PathVariable Long playlistId, @PathVariable Long songId) {
-        playlistSongRepository.deleteByPlaylistIdAndSongId(playlistId, songId);
+        playlistSongService.deletePlaylistSongByPlaylistAndSong(playlistId, songId);
         return ResponseEntity.noContent().build();
     }
 }

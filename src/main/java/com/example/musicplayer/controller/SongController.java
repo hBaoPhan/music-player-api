@@ -15,52 +15,43 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.musicplayer.entity.Song;
-import com.example.musicplayer.repository.SongRepository;
+import com.example.musicplayer.service.SongService;
 
 @RestController
 @RequestMapping("/api/songs")
 public class SongController {
     
     @Autowired
-    private SongRepository songRepository;
+    private SongService songService;
     
     @GetMapping
     public List<Song> getAllSongs() {
-        return songRepository.findAll();
+        return songService.getAllSongs();
     }
     
     @GetMapping("/{id}")
     public ResponseEntity<Song> getSongById(@PathVariable Long id) {
-        return songRepository.findById(id)
+        return songService.getSongById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
     
     @PostMapping
     public ResponseEntity<Song> createSong(@RequestBody Song song) {
-        Song savedSong = songRepository.save(song);
+        Song savedSong = songService.createSong(song);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedSong);
     }
     
     @PutMapping("/{id}")
     public ResponseEntity<Song> updateSong(@PathVariable Long id, @RequestBody Song songDetails) {
-        return songRepository.findById(id)
-                .map(song -> {
-                    song.setTitle(songDetails.getTitle());
-                    song.setArtistId(songDetails.getArtistId());
-                    song.setAlbumId(songDetails.getAlbumId());
-                    song.setAudioUrl(songDetails.getAudioUrl());
-                    song.setDuration(songDetails.getDuration());
-                    song.setPlayCount(songDetails.getPlayCount());
-                    return ResponseEntity.ok(songRepository.save(song));
-                })
+        return songService.updateSong(id, songDetails)
+                .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
     
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteSong(@PathVariable Long id) {
-        if (songRepository.existsById(id)) {
-            songRepository.deleteById(id);
+        if (songService.deleteSong(id)) {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.notFound().build();
@@ -68,16 +59,16 @@ public class SongController {
     
     @GetMapping("/artist/{artistId}")
     public List<Song> getSongsByArtist(@PathVariable Long artistId) {
-        return songRepository.findByArtistId(artistId);
+        return songService.getSongsByArtist(artistId);
     }
     
     @GetMapping("/album/{albumId}")
     public List<Song> getSongsByAlbum(@PathVariable Long albumId) {
-        return songRepository.findByAlbumId(albumId);
+        return songService.getSongsByAlbum(albumId);
     }
     
     @GetMapping("/title/{title}")
     public List<Song> getSongsByTitle(@PathVariable String title) {
-        return songRepository.findByTitle(title);
+        return songService.getSongsByTitle(title);
     }
 }

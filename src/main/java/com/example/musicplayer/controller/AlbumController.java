@@ -15,50 +15,45 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.musicplayer.entity.Album;
-import com.example.musicplayer.repository.AlbumRepository;
+import com.example.musicplayer.entity.Artist;
+import com.example.musicplayer.entity.Song;
+import com.example.musicplayer.service.AlbumService;
 
 @RestController
 @RequestMapping("/api/albums")
 public class AlbumController {
     
     @Autowired
-    private AlbumRepository albumRepository;
+    private AlbumService albumService;
     
     @GetMapping
     public List<Album> getAllAlbums() {
-        return albumRepository.findAll();
+        return albumService.getAllAlbums();
     }
     
     @GetMapping("/{id}")
     public ResponseEntity<Album> getAlbumById(@PathVariable Long id) {
-        return albumRepository.findById(id)
+        return albumService.getAlbumById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
     
     @PostMapping
     public ResponseEntity<Album> createAlbum(@RequestBody Album album) {
-        Album savedAlbum = albumRepository.save(album);
+        Album savedAlbum = albumService.createAlbum(album);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedAlbum);
     }
     
     @PutMapping("/{id}")
     public ResponseEntity<Album> updateAlbum(@PathVariable Long id, @RequestBody Album albumDetails) {
-        return albumRepository.findById(id)
-                .map(album -> {
-                    album.setTitle(albumDetails.getTitle());
-                    album.setArtistId(albumDetails.getArtistId());
-                    album.setCoverUrl(albumDetails.getCoverUrl());
-                    album.setReleaseDate(albumDetails.getReleaseDate());
-                    return ResponseEntity.ok(albumRepository.save(album));
-                })
+        return albumService.updateAlbum(id, albumDetails)
+                .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
     
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteAlbum(@PathVariable Long id) {
-        if (albumRepository.existsById(id)) {
-            albumRepository.deleteById(id);
+        if (albumService.deleteAlbum(id)) {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.notFound().build();
@@ -66,6 +61,13 @@ public class AlbumController {
     
     @GetMapping("/artist/{artistId}")
     public List<Album> getAlbumsByArtist(@PathVariable Long artistId) {
-        return albumRepository.findByArtistId(artistId);
+        return albumService.getAlbumsByArtist(artistId);
+    }
+
+    @GetMapping("/{id}/songs")
+    public ResponseEntity<List<Song>> getAlbumSongs(@PathVariable Long id) {
+        return albumService.getAlbumById(id)
+                .map(album -> ResponseEntity.ok(album.getSongs()))
+                .orElse(ResponseEntity.notFound().build());
     }
 }
