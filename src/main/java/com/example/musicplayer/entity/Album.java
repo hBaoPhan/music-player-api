@@ -1,12 +1,16 @@
 package com.example.musicplayer.entity;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
@@ -23,11 +27,18 @@ public class Album {
     @Column(name = "artist_id", nullable = false)
     private Long artistId;
     
+    @ManyToOne
+    @JoinColumn(name = "artist_id", insertable = false, updatable = false)
+    private Artist artist;
+    
     @Column(name = "cover_url")
     private String coverUrl;
     
     @Column(name = "release_date")
     private LocalDate releaseDate;
+
+    @OneToMany(mappedBy = "album")
+    private List<Song> songs;
 
     public Album() {}
 
@@ -76,5 +87,21 @@ public class Album {
 
     public void setReleaseDate(LocalDate releaseDate) {
         this.releaseDate = releaseDate;
+    }
+
+    public Artist getArtist() {
+        return artist;
+    }
+
+    public void setArtist(Artist artist) {
+        this.artist = artist;
+    }
+
+    public List<Song> getSongs() {
+        return songs;
+    }
+
+    public void setSongs(List<Song> songs) {
+        this.songs = songs;
     }
 }

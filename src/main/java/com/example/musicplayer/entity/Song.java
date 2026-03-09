@@ -5,51 +5,36 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "songs")
 public class Song {
-    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
+
     @Column(nullable = false)
     private String title;
-    
-    @Column(name = "artist_id", nullable = false)
-    private Long artistId;
-    
-    @Column(name = "album_id")
-    private Long albumId;
-    
-    @Column(name = "audio_url")
+
     private String audioUrl;
     
-    @Column(nullable = false)
     private Integer duration;
-    
-    @Column(name = "play_count")
+
     private Integer playCount = 0;
 
-    public Song() {}
+    @ManyToOne
+    @JoinColumn(name = "artist_id")
+    private Artist artist;
 
-    public Song(String title, Long artistId, Long albumId, String audioUrl, Integer duration) {
-        this.title = title;
-        this.artistId = artistId;
-        this.albumId = albumId;
-        this.audioUrl = audioUrl;
-        this.duration = duration;
-        this.playCount = 0;
-    }
+    @ManyToOne
+    @JoinColumn(name ="album_id")
+    private Album album;
 
     public Long getId() {
         return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public String getTitle() {
@@ -58,22 +43,6 @@ public class Song {
 
     public void setTitle(String title) {
         this.title = title;
-    }
-
-    public Long getArtistId() {
-        return artistId;
-    }
-
-    public void setArtistId(Long artistId) {
-        this.artistId = artistId;
-    }
-
-    public Long getAlbumId() {
-        return albumId;
-    }
-
-    public void setAlbumId(Long albumId) {
-        this.albumId = albumId;
     }
 
     public String getAudioUrl() {
@@ -99,4 +68,22 @@ public class Song {
     public void setPlayCount(Integer playCount) {
         this.playCount = playCount;
     }
+
+    public Artist getArtist() {
+        return artist;
+    }
+
+    public void setArtist(Artist artist) {
+        this.artist = artist;
+    }
+
+    public Album getAlbum() {
+        return album;
+    }
+
+    public void setAlbum(Album album) {
+        this.album = album;
+    }
+
+    
 }
