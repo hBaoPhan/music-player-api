@@ -7,13 +7,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.musicplayer.entity.Playlist;
+import com.example.musicplayer.entity.Song;
 import com.example.musicplayer.repository.PlaylistRepository;
+import com.example.musicplayer.repository.SongRepository;
+
+import jakarta.transaction.Transactional;
 
 @Service
 public class PlaylistService {
     
     @Autowired
     private PlaylistRepository playlistRepository;
+    private SongRepository songRepository;
     
     public List<Playlist> getAllPlaylists() {
         return playlistRepository.findAll();
@@ -50,5 +55,19 @@ public class PlaylistService {
     
     public List<Playlist> getPlaylistsByUser(Long userId) {
         return playlistRepository.findByUserId(userId);
+    }
+    @Transactional 
+    public Playlist addSongToPlaylist(Long playlistId, Long songId) {
+        // Tìm song av playlist 
+        Playlist playlist = playlistRepository.findById(playlistId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy Playlist"));
+
+        Song song = songRepository.findById(songId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy bài hát"));
+
+        if (!playlist.getSongs().contains(song)) {
+            playlist.getSongs().add(song);
+        }
+        return playlistRepository.save(playlist);
     }
 }

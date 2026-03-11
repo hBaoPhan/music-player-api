@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import com.example.musicplayer.entity.User;
@@ -50,6 +51,8 @@ public class UserService {
     }
     
     public User findByUsername(String username) {
-        return userRepository.findByUsername(username);
+        return userRepository.findByUsername(username).orElseThrow(() -> {
+                    return new UsernameNotFoundException("User not found: " + username);
+                });
     }
 }

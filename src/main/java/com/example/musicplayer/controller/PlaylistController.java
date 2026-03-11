@@ -69,4 +69,10 @@ public class PlaylistController {
                 .map(playlist -> ResponseEntity.ok(playlist.getSongs()))
                 .orElse(ResponseEntity.notFound().build());
     }
+    @PostMapping("/{playlistId}/songs/{songId}")
+    public ResponseEntity<Playlist> addSong(@PathVariable Long playlistId, @PathVariable Long songId) {
+        
+        Playlist updatedPlaylist = playlistService.addSongToPlaylist(playlistId, songId);
+        return ResponseEntity.ok(updatedPlaylist);
+    }
 }

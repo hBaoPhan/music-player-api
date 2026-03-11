@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.musicplayer.entity.Album;
-import com.example.musicplayer.entity.Artist;
 import com.example.musicplayer.entity.Song;
 import com.example.musicplayer.service.AlbumService;
 
