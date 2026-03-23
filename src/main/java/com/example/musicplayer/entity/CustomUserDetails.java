@@ -1,4 +1,4 @@
-package com.example.musicplayer.security;
+package com.example.musicplayer.entity;
 
 import java.util.Collection; 
 import java.util.Collections;
@@ -6,8 +6,6 @@ import java.util.Collections;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-
-import com.example.musicplayer.entity.User;
 
 public class CustomUserDetails implements UserDetails {
 
@@ -17,10 +15,8 @@ public class CustomUserDetails implements UserDetails {
         this.user = user;
     }
 
-    // Spring Security sẽ dùng hàm này để lấy roles/quyền của user
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        // Giả sử bảng users của bạn có cột role (ví dụ: "ROLE_USER", "ROLE_ADMIN")
         return Collections.singleton(new SimpleGrantedAuthority(user.getRole().toString()));
     }
 

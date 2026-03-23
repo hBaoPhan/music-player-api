@@ -40,7 +40,6 @@ public class AuthController {
    @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest) throws Exception {
         
-        // 3. Lấy AuthenticationManager trực tiếp tại đây mỗi khi có request đăng nhập
         AuthenticationManager authenticationManager = authenticationConfiguration.getAuthenticationManager();
 
         Authentication authentication = authenticationManager.authenticate(
@@ -58,23 +57,17 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody RegisterRequest signUpRequest) {
-        // 1. Kiểm tra xem username đã tồn tại chưa (Yêu cầu hàm existsByUsername trong UserRepository)
         if (userRepository.existsByUsername(signUpRequest.getUsername())) {
             return ResponseEntity.badRequest().body("Lỗi: Username đã tồn tại!");
         }
-
-        // 2. Tạo đối tượng User mới
         User user = new User();
         user.setUsername(signUpRequest.getUsername());
         user.setEmail(signUpRequest.getEmail());
         
-        // BƯỚC QUAN TRỌNG NHẤT: Mã hóa mật khẩu trước khi lưu
         user.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
-        
-        // Set quyền mặc định (Giả sử bạn có cột role dạng String trong bảng users)
+
         user.setRole(Role.USER);
 
-        // 3. Lưu xuống database
         userRepository.save(user);
 
         return ResponseEntity.ok("Đăng ký tài khoản thành công!");
