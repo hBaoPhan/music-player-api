@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,18 +24,19 @@ import com.example.musicplayer.service.ArtistService;
 
 @RestController
 @RequestMapping("/api/artists")
+@CrossOrigin(origins = "http://localhost:5173")
 public class ArtistController {
-    
+
     @Autowired
     private ArtistService artistService;
-    
+
     @GetMapping
     public List<ArtistDTO> getAllArtists() {
         return artistService.getAllArtists().stream()
                 .map(ArtistDTO::new)
                 .collect(Collectors.toList());
     }
-    
+
     @GetMapping("/{id}")
     public ResponseEntity<ArtistDTO> getArtistById(@PathVariable Long id) {
         return artistService.getArtistById(id)
@@ -42,13 +44,13 @@ public class ArtistController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
-    
+
     @PostMapping
     public ResponseEntity<ArtistDTO> createArtist(@RequestBody Artist artist) {
         Artist savedArtist = artistService.createArtist(artist);
         return ResponseEntity.status(HttpStatus.CREATED).body(new ArtistDTO(savedArtist));
     }
-    
+
     @PutMapping("/{id}")
     public ResponseEntity<ArtistDTO> updateArtist(@PathVariable Long id, @RequestBody Artist artistDetails) {
         return artistService.updateArtist(id, artistDetails)
@@ -56,7 +58,7 @@ public class ArtistController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
-    
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteArtist(@PathVariable Long id) {
         if (artistService.deleteArtist(id)) {
@@ -64,7 +66,7 @@ public class ArtistController {
         }
         return ResponseEntity.notFound().build();
     }
-    
+
     @GetMapping("/name/{name}")
     public ResponseEntity<ArtistDTO> getArtistByName(@PathVariable String name) {
         Artist artist = artistService.findByName(name);
@@ -79,9 +81,8 @@ public class ArtistController {
         return artistService.getArtistById(id)
                 .map(artist -> ResponseEntity.ok(
                         artist.getAlbums().stream()
-                              .map(AlbumDTO::new)
-                              .collect(Collectors.toList())
-                ))
+                                .map(AlbumDTO::new)
+                                .collect(Collectors.toList())))
                 .orElse(ResponseEntity.notFound().build());
     }
 
@@ -90,9 +91,8 @@ public class ArtistController {
         return artistService.getArtistById(id)
                 .map(artist -> ResponseEntity.ok(
                         artist.getSongs().stream()
-                              .map(SongDTO::new)
-                              .collect(Collectors.toList())
-                ))
+                                .map(SongDTO::new)
+                                .collect(Collectors.toList())))
                 .orElse(ResponseEntity.notFound().build());
     }
 }

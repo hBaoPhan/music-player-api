@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,18 +23,19 @@ import com.example.musicplayer.service.AlbumService;
 
 @RestController
 @RequestMapping("/api/albums")
+@CrossOrigin(origins = "http://localhost:5173")
 public class AlbumController {
-    
+
     @Autowired
     private AlbumService albumService;
-    
+
     @GetMapping
     public List<AlbumDTO> getAllAlbums() {
         return albumService.getAllAlbums().stream()
                 .map(AlbumDTO::new)
                 .collect(Collectors.toList());
     }
-    
+
     @GetMapping("/{id}")
     public ResponseEntity<AlbumDTO> getAlbumById(@PathVariable Long id) {
         return albumService.getAlbumById(id)
@@ -41,13 +43,13 @@ public class AlbumController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
-    
+
     @PostMapping
     public ResponseEntity<AlbumDTO> createAlbum(@RequestBody Album album) {
         Album savedAlbum = albumService.createAlbum(album);
         return ResponseEntity.status(HttpStatus.CREATED).body(new AlbumDTO(savedAlbum));
     }
-    
+
     @PutMapping("/{id}")
     public ResponseEntity<AlbumDTO> updateAlbum(@PathVariable Long id, @RequestBody Album albumDetails) {
         return albumService.updateAlbum(id, albumDetails)
@@ -55,7 +57,7 @@ public class AlbumController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
-    
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteAlbum(@PathVariable Long id) {
         if (albumService.deleteAlbum(id)) {
@@ -63,7 +65,7 @@ public class AlbumController {
         }
         return ResponseEntity.notFound().build();
     }
-    
+
     @GetMapping("/artist/{artistId}")
     public List<AlbumDTO> getAlbumsByArtist(@PathVariable Long artistId) {
         return albumService.getAlbumsByArtist(artistId).stream()
@@ -76,9 +78,8 @@ public class AlbumController {
         return albumService.getAlbumById(id)
                 .map(album -> ResponseEntity.ok(
                         album.getSongs().stream()
-                             .map(SongDTO::new)
-                             .collect(Collectors.toList())
-                ))
+                                .map(SongDTO::new)
+                                .collect(Collectors.toList())))
                 .orElse(ResponseEntity.notFound().build());
     }
 }

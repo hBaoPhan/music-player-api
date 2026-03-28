@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,18 +23,19 @@ import com.example.musicplayer.service.PlaylistService;
 
 @RestController
 @RequestMapping("/api/playlists")
+@CrossOrigin(origins = "http://localhost:5173")
 public class PlaylistController {
-    
+
     @Autowired
     private PlaylistService playlistService;
-    
+
     @GetMapping
     public List<PlaylistDTO> getAllPlaylists() {
         return playlistService.getAllPlaylists().stream()
                 .map(PlaylistDTO::new)
                 .collect(Collectors.toList());
     }
-    
+
     @GetMapping("/{id}")
     public ResponseEntity<PlaylistDTO> getPlaylistById(@PathVariable Long id) {
         return playlistService.getPlaylistById(id)
@@ -41,13 +43,13 @@ public class PlaylistController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
-    
+
     @PostMapping
     public ResponseEntity<PlaylistDTO> createPlaylist(@RequestBody Playlist playlist) {
         Playlist savedPlaylist = playlistService.createPlaylist(playlist);
         return ResponseEntity.status(HttpStatus.CREATED).body(new PlaylistDTO(savedPlaylist));
     }
-    
+
     @PutMapping("/{id}")
     public ResponseEntity<PlaylistDTO> updatePlaylist(@PathVariable Long id, @RequestBody Playlist playlistDetails) {
         return playlistService.updatePlaylist(id, playlistDetails)
@@ -55,7 +57,7 @@ public class PlaylistController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
-    
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePlaylist(@PathVariable Long id) {
         if (playlistService.deletePlaylist(id)) {
@@ -63,7 +65,7 @@ public class PlaylistController {
         }
         return ResponseEntity.notFound().build();
     }
-    
+
     @GetMapping("/user/{userId}")
     public List<PlaylistDTO> getPlaylistsByUser(@PathVariable Long userId) {
         return playlistService.getPlaylistsByUser(userId).stream()
@@ -77,8 +79,7 @@ public class PlaylistController {
                 .map(playlist -> ResponseEntity.ok(
                         playlist.getSongs().stream()
                                 .map(SongDTO::new)
-                                .collect(Collectors.toList())
-                ))
+                                .collect(Collectors.toList())))
                 .orElse(ResponseEntity.notFound().build());
     }
 
