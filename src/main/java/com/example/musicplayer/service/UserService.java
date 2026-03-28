@@ -52,7 +52,7 @@ public class UserService {
     
     public User findByUsername(String username) {
         return userRepository.findByUsername(username).orElseThrow(() -> {
-                    return new UsernameNotFoundException("User not found: " + username);
+                    return new UsernameNotFoundException("Không tìm thấy người dùng: " + username);
                 });
     }
 }

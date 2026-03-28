@@ -1,6 +1,7 @@
 package com.example.musicplayer.controller;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,7 +16,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.musicplayer.entity.Playlist;
-import com.example.musicplayer.entity.Song;
+import com.example.musicplayer.dto.PlaylistDTO;
+import com.example.musicplayer.dto.SongDTO;
 import com.example.musicplayer.service.PlaylistService;
 
 @RestController
@@ -26,26 +28,30 @@ public class PlaylistController {
     private PlaylistService playlistService;
     
     @GetMapping
-    public List<Playlist> getAllPlaylists() {
-        return playlistService.getAllPlaylists();
+    public List<PlaylistDTO> getAllPlaylists() {
+        return playlistService.getAllPlaylists().stream()
+                .map(PlaylistDTO::new)
+                .collect(Collectors.toList());
     }
     
     @GetMapping("/{id}")
-    public ResponseEntity<Playlist> getPlaylistById(@PathVariable Long id) {
+    public ResponseEntity<PlaylistDTO> getPlaylistById(@PathVariable Long id) {
         return playlistService.getPlaylistById(id)
+                .map(PlaylistDTO::new)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
     
     @PostMapping
-    public ResponseEntity<Playlist> createPlaylist(@RequestBody Playlist playlist) {
+    public ResponseEntity<PlaylistDTO> createPlaylist(@RequestBody Playlist playlist) {
         Playlist savedPlaylist = playlistService.createPlaylist(playlist);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedPlaylist);
+        return ResponseEntity.status(HttpStatus.CREATED).body(new PlaylistDTO(savedPlaylist));
     }
     
     @PutMapping("/{id}")
-    public ResponseEntity<Playlist> updatePlaylist(@PathVariable Long id, @RequestBody Playlist playlistDetails) {
+    public ResponseEntity<PlaylistDTO> updatePlaylist(@PathVariable Long id, @RequestBody Playlist playlistDetails) {
         return playlistService.updatePlaylist(id, playlistDetails)
+                .map(PlaylistDTO::new)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -59,20 +65,26 @@ public class PlaylistController {
     }
     
     @GetMapping("/user/{userId}")
-    public List<Playlist> getPlaylistsByUser(@PathVariable Long userId) {
-        return playlistService.getPlaylistsByUser(userId);
+    public List<PlaylistDTO> getPlaylistsByUser(@PathVariable Long userId) {
+        return playlistService.getPlaylistsByUser(userId).stream()
+                .map(PlaylistDTO::new)
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/{id}/songs")
-    public ResponseEntity<List<Song>> getPlaylistSongs(@PathVariable Long id) {
+    public ResponseEntity<List<SongDTO>> getPlaylistSongs(@PathVariable Long id) {
         return playlistService.getPlaylistById(id)
-                .map(playlist -> ResponseEntity.ok(playlist.getSongs()))
+                .map(playlist -> ResponseEntity.ok(
+                        playlist.getSongs().stream()
+                                .map(SongDTO::new)
+                                .collect(Collectors.toList())
+                ))
                 .orElse(ResponseEntity.notFound().build());
     }
+
     @PostMapping("/{playlistId}/songs/{songId}")
-    public ResponseEntity<Playlist> addSong(@PathVariable Long playlistId, @PathVariable Long songId) {
-        
+    public ResponseEntity<PlaylistDTO> addSong(@PathVariable Long playlistId, @PathVariable Long songId) {
         Playlist updatedPlaylist = playlistService.addSongToPlaylist(playlistId, songId);
-        return ResponseEntity.ok(updatedPlaylist);
+        return ResponseEntity.ok(new PlaylistDTO(updatedPlaylist));
     }
 }

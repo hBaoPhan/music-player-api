@@ -8,6 +8,7 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,9 +24,10 @@ import com.example.musicplayer.security.JwtTokenProvider;
 
 @RestController
 @RequestMapping("/api/auth")
+@CrossOrigin(origins = "http://localhost:5173")
 public class AuthController {
 
-   @Autowired
+    @Autowired
     private AuthenticationConfiguration authenticationConfiguration;
 
     @Autowired
@@ -37,21 +39,19 @@ public class AuthController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-   @PostMapping("/login")
+    @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest) throws Exception {
-        
+
         AuthenticationManager authenticationManager = authenticationConfiguration.getAuthenticationManager();
 
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         loginRequest.getUsername(),
-                        loginRequest.getPassword()
-                )
-        );
+                        loginRequest.getPassword()));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = tokenProvider.generateToken(authentication);
-        
+
         return ResponseEntity.ok(new JwtResponse(jwt));
     }
 
@@ -63,7 +63,7 @@ public class AuthController {
         User user = new User();
         user.setUsername(signUpRequest.getUsername());
         user.setEmail(signUpRequest.getEmail());
-        
+
         user.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
 
         user.setRole(Role.USER);
