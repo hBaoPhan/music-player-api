@@ -21,7 +21,7 @@ public class Album {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    @Column(nullable = false)
+    @Column(columnDefinition = "NVARCHAR(255)", nullable = false)
     private String title;
     
     @Column(name = "artist_id", nullable = false)
@@ -31,7 +31,7 @@ public class Album {
     @JoinColumn(name = "artist_id", insertable = false, updatable = false)
     private Artist artist;
     
-    @Column(name = "cover_url")
+    @Column(name = "cover_url", columnDefinition = "NVARCHAR(MAX)")
     private String coverUrl;
     
     @Column(name = "release_date")

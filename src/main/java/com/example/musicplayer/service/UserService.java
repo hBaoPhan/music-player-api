@@ -6,28 +6,33 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import jakarta.transaction.Transactional;
 
+import com.example.musicplayer.entity.Song;
 import com.example.musicplayer.entity.User;
+import com.example.musicplayer.repository.SongRepository;
 import com.example.musicplayer.repository.UserRepository;
 
 @Service
 public class UserService {
-    
+
     @Autowired
     private UserRepository userRepository;
-    
+
+    private SongRepository songRepository;
+
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
-    
+
     public Optional<User> getUserById(Long id) {
         return userRepository.findById(id);
     }
-    
+
     public User createUser(User user) {
         return userRepository.save(user);
     }
-    
+
     public Optional<User> updateUser(Long id, User userDetails) {
         return userRepository.findById(id)
                 .map(user -> {
@@ -38,10 +43,13 @@ public class UserService {
                     if (userDetails.getPlaylists() != null) {
                         user.setPlaylists(userDetails.getPlaylists());
                     }
+                    if (userDetails.getFavoriteSongs() != null) {
+                        user.setFavoriteSongs(userDetails.getFavoriteSongs());
+                    }
                     return userRepository.save(user);
                 });
     }
-    
+
     public boolean deleteUser(Long id) {
         if (userRepository.existsById(id)) {
             userRepository.deleteById(id);
@@ -49,10 +57,33 @@ public class UserService {
         }
         return false;
     }
-    
+
     public User findByUsername(String username) {
         return userRepository.findByUsername(username).orElseThrow(() -> {
-                    return new UsernameNotFoundException("Không tìm thấy người dùng: " + username);
-                });
+            return new UsernameNotFoundException("Không tìm thấy người dùng: " + username);
+        });
+    }
+
+    @Transactional
+    public User toggleFavorite(Long userId, Long songId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy User"));
+
+        Song song = songRepository.findById(songId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy Bài hát"));
+
+        if (user.getFavoriteSongs().contains(song)) {
+            user.getFavoriteSongs().remove(song);
+        } else {
+            user.getFavoriteSongs().add(song);
+        }
+
+        return userRepository.save(user);
+    }
+
+    public List<Song> getFavoriteSongs(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy User"));
+        return user.getFavoriteSongs();
     }
 }

@@ -13,18 +13,18 @@ import jakarta.persistence.Table;
 @Entity
 @Table(name = "artists")
 public class Artist {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
-    @Column(nullable = false)
+
+    @Column(columnDefinition = "NVARCHAR(255)", nullable = false)
     private String name;
-    
-    @Column(columnDefinition = "TEXT")
+
+    @Column(columnDefinition = "NVARCHAR(MAX)")
     private String bio;
-    
-    @Column(name = "avatar_url")
+
+    @Column(name = "avatar_url", columnDefinition = "NVARCHAR(MAX)")
     private String avatarUrl;
 
     @OneToMany(mappedBy = "artist")
@@ -33,7 +33,8 @@ public class Artist {
     @OneToMany(mappedBy = "artist")
     private List<Song> songs;
 
-    public Artist() {}
+    public Artist() {
+    }
 
     public Artist(String name, String bio, String avatarUrl) {
         this.name = name;

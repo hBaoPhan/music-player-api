@@ -16,9 +16,10 @@ public class Song {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(columnDefinition = "NVARCHAR(255)", nullable = false)
     private String title;
 
+    @Column(columnDefinition = "NVARCHAR(MAX)")
     private String audioUrl;
     
     private Integer duration;

@@ -1,5 +1,6 @@
 package com.example.musicplayer.entity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.persistence.Column;
@@ -9,26 +10,29 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "users")
 public class User {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
-    @Column(unique = true, nullable = false)
+
+    @Column(columnDefinition = "NVARCHAR(255)", unique = true, nullable = false)
     private String username;
-    
-    @Column(nullable = false)
+
+    @Column(columnDefinition = "NVARCHAR(255)", nullable = false)
     private String password;
-    
-    @Column(unique = true, nullable = false)
+
+    @Column(columnDefinition = "NVARCHAR(255)", unique = true, nullable = false)
     private String email;
-    
+
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Role role;
@@ -36,7 +40,21 @@ public class User {
     @OneToMany(mappedBy = "user")
     private List<Playlist> playlists;
 
-    public User() {}
+    @ManyToMany
+    @JoinTable(name = "user_favorites", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "song_id"))
+
+    private List<Song> favoriteSongs = new ArrayList<>();
+
+    public User() {
+    }
+
+    public List<Song> getFavoriteSongs() {
+        return favoriteSongs;
+    }
+
+    public void setFavoriteSongs(List<Song> favoriteSongs) {
+        this.favoriteSongs = favoriteSongs;
+    }
 
     public Long getId() {
         return id;
@@ -86,4 +104,3 @@ public class User {
         this.playlists = playlists;
     }
 }
-

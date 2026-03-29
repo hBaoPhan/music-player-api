@@ -1,5 +1,8 @@
 package com.example.musicplayer.dto;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import com.example.musicplayer.entity.Role;
 import com.example.musicplayer.entity.User;
 
@@ -8,6 +11,8 @@ public class UserDTO {
     private String username;
     private String email;
     private Role role;
+    private List<PlaylistDTO> playlists;
+    private List<SongDTO> favoriteSongs;
 
     public UserDTO() {}
 
@@ -17,6 +22,16 @@ public class UserDTO {
             this.username = user.getUsername();
             this.email = user.getEmail();
             this.role = user.getRole();
+            if (user.getPlaylists() != null) {
+                this.playlists = user.getPlaylists().stream()
+                        .map(PlaylistDTO::new)
+                        .collect(Collectors.toList());
+            }
+            if (user.getFavoriteSongs() != null) {
+                this.favoriteSongs = user.getFavoriteSongs().stream()
+                        .map(SongDTO::new)
+                        .collect(Collectors.toList());
+            }
         }
     }
 
@@ -50,5 +65,21 @@ public class UserDTO {
 
     public void setRole(Role role) {
         this.role = role;
+    }
+
+    public List<PlaylistDTO> getPlaylists() {
+        return playlists;
+    }
+
+    public void setPlaylists(List<PlaylistDTO> playlists) {
+        this.playlists = playlists;
+    }
+
+    public List<SongDTO> getFavoriteSongs() {
+        return favoriteSongs;
+    }
+
+    public void setFavoriteSongs(List<SongDTO> favoriteSongs) {
+        this.favoriteSongs = favoriteSongs;
     }
 }

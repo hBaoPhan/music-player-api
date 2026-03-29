@@ -17,7 +17,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.musicplayer.dto.PlaylistDTO;
+import com.example.musicplayer.dto.SongDTO;
 import com.example.musicplayer.dto.UserDTO;
+import com.example.musicplayer.entity.Song;
 import com.example.musicplayer.entity.User;
 import com.example.musicplayer.service.UserService;
 
@@ -71,9 +73,8 @@ public class UserController {
         return userService.getUserById(id)
                 .map(user -> ResponseEntity.ok(
                         user.getPlaylists().stream()
-                            .map(PlaylistDTO::new)
-                            .collect(Collectors.toList())
-                ))
+                                .map(PlaylistDTO::new)
+                                .collect(Collectors.toList())))
                 .orElse(ResponseEntity.notFound().build());
     }
 
@@ -84,5 +85,28 @@ public class UserController {
             return ResponseEntity.ok(new UserDTO(user));
         }
         return ResponseEntity.notFound().build();
+    }
+
+    @GetMapping("/{userId}/favorites")
+    public ResponseEntity<List<SongDTO>> getFavoriteSongs(@PathVariable Long userId) {
+        try {
+            List<Song> favorites = userService.getFavoriteSongs(userId);
+            List<SongDTO> favoriteDTOs = favorites.stream()
+                    .map(SongDTO::new)
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok(favoriteDTOs);
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PostMapping("/{userId}/favorites/{songId}")
+    public ResponseEntity<?> toggleFavorite(@PathVariable Long userId, @PathVariable Long songId) {
+        try {
+            userService.toggleFavorite(userId, songId);
+            return ResponseEntity.ok("Đã cập nhật danh sách yêu thích!");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 }
