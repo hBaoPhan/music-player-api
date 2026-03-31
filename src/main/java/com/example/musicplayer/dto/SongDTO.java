@@ -8,6 +8,8 @@ public class SongDTO {
     private String audioUrl;
     private Integer duration;
     private Integer playCount;
+    private String category;
+    private String thumbnail;
     private ArtistDTO artist;
     private AlbumDTO album;
 
@@ -20,6 +22,8 @@ public class SongDTO {
             this.audioUrl = song.getAudioUrl();
             this.duration = song.getDuration();
             this.playCount = song.getPlayCount();
+            this.category = song.getCategory();
+            this.thumbnail = song.getThumbnail();
             if (song.getArtist() != null) {
                 this.artist = new ArtistDTO(song.getArtist());
             }
@@ -83,5 +87,21 @@ public class SongDTO {
 
     public void setAlbum(AlbumDTO album) {
         this.album = album;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public String getThumbnail() {
+        return thumbnail;
+    }
+
+    public void setThumbnail(String thumbnail) {
+        this.thumbnail = thumbnail;
     }
 }

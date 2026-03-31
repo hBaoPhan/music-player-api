@@ -19,6 +19,7 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
     private SongRepository songRepository;
 
     public List<User> getAllUsers() {
@@ -72,9 +73,8 @@ public class UserService {
         Song song = songRepository.findById(songId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy Bài hát"));
 
-        if (user.getFavoriteSongs().contains(song)) {
-            user.getFavoriteSongs().remove(song);
-        } else {
+        boolean removed = user.getFavoriteSongs().removeIf(s -> s.getId().equals(song.getId()));
+        if (!removed) {
             user.getFavoriteSongs().add(song);
         }
 

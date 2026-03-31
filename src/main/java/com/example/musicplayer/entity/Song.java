@@ -26,6 +26,12 @@ public class Song {
 
     private Integer playCount = 0;
 
+    @Column(columnDefinition = "NVARCHAR(255)")
+    private String category;
+
+    @Column(columnDefinition = "NVARCHAR(MAX)")
+    private String thumbnail;
+
     @ManyToOne
     @JoinColumn(name = "artist_id")
     private Artist artist;
@@ -86,5 +92,19 @@ public class Song {
         this.album = album;
     }
 
-    
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public String getThumbnail() {
+        return thumbnail;
+    }
+
+    public void setThumbnail(String thumbnail) {
+        this.thumbnail = thumbnail;
+    }
 }
