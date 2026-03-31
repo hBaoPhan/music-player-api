@@ -29,9 +29,6 @@ public class Song {
     @Column(columnDefinition = "NVARCHAR(255)")
     private String category;
 
-    @Column(columnDefinition = "NVARCHAR(MAX)")
-    private String thumbnail;
-
     @ManyToOne
     @JoinColumn(name = "artist_id")
     private Artist artist;
@@ -98,13 +95,5 @@ public class Song {
 
     public void setCategory(String category) {
         this.category = category;
-    }
-
-    public String getThumbnail() {
-        return thumbnail;
-    }
-
-    public void setThumbnail(String thumbnail) {
-        this.thumbnail = thumbnail;
     }
 }

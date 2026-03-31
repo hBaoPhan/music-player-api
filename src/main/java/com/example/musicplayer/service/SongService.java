@@ -37,7 +37,6 @@ public class SongService {
                     song.setDuration(songDetails.getDuration());
                     song.setPlayCount(songDetails.getPlayCount());
                     song.setCategory(songDetails.getCategory());
-                    song.setThumbnail(songDetails.getThumbnail());
                     return songRepository.save(song);
                 });
     }
