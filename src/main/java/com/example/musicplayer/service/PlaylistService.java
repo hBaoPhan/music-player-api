@@ -1,5 +1,6 @@
 package com.example.musicplayer.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -7,8 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.musicplayer.entity.Playlist;
-import com.example.musicplayer.entity.Song;
+import com.example.musicplayer.entity.PlaylistSong;
 import com.example.musicplayer.repository.PlaylistRepository;
+import com.example.musicplayer.repository.PlaylistSongRepository;
 import com.example.musicplayer.repository.SongRepository;
 
 import jakarta.transaction.Transactional;
@@ -18,7 +20,12 @@ public class PlaylistService {
     
     @Autowired
     private PlaylistRepository playlistRepository;
+    
+    @Autowired
     private SongRepository songRepository;
+    
+    @Autowired
+    private PlaylistSongRepository playlistSongRepository;
     
     public List<Playlist> getAllPlaylists() {
         return playlistRepository.findAll();
@@ -62,12 +69,15 @@ public class PlaylistService {
         Playlist playlist = playlistRepository.findById(playlistId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy Playlist"));
 
-        Song song = songRepository.findById(songId)
+        songRepository.findById(songId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy bài hát"));
 
-        if (!playlist.getSongs().contains(song)) {
-            playlist.getSongs().add(song);
+        if (!playlistSongRepository.existsByPlaylistIdAndSongId(playlistId, songId)) {
+            PlaylistSong mapping = new PlaylistSong(
+                playlistId, songId, LocalDateTime.now()
+            );
+            playlistSongRepository.save(mapping);
         }
-        return playlistRepository.save(playlist);
+        return playlist;
     }
 }

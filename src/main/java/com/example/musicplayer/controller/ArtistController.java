@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import com.example.musicplayer.dto.AlbumDTO;
 import com.example.musicplayer.dto.ArtistDTO;
@@ -45,12 +46,14 @@ public class ArtistController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<ArtistDTO> createArtist(@RequestBody Artist artist) {
         Artist savedArtist = artistService.createArtist(artist);
         return ResponseEntity.status(HttpStatus.CREATED).body(new ArtistDTO(savedArtist));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<ArtistDTO> updateArtist(@PathVariable Long id, @RequestBody Artist artistDetails) {
         return artistService.updateArtist(id, artistDetails)
@@ -59,6 +62,7 @@ public class ArtistController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteArtist(@PathVariable Long id) {
         if (artistService.deleteArtist(id)) {

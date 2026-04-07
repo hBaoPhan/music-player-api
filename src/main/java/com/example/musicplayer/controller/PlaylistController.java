@@ -20,6 +20,7 @@ import com.example.musicplayer.dto.PlaylistDTO;
 import com.example.musicplayer.dto.SongDTO;
 import com.example.musicplayer.entity.Playlist;
 import com.example.musicplayer.service.PlaylistService;
+import com.example.musicplayer.service.PlaylistSongService;
 
 @RestController
 @RequestMapping("/api/playlists")
@@ -28,6 +29,9 @@ public class PlaylistController {
 
     @Autowired
     private PlaylistService playlistService;
+
+    @Autowired
+    private PlaylistSongService playlistSongService;
 
     @GetMapping
     public List<PlaylistDTO> getAllPlaylists() {
@@ -87,5 +91,13 @@ public class PlaylistController {
     public ResponseEntity<PlaylistDTO> addSong(@PathVariable Long playlistId, @PathVariable Long songId) {
         Playlist updatedPlaylist = playlistService.addSongToPlaylist(playlistId, songId);
         return ResponseEntity.ok(new PlaylistDTO(updatedPlaylist));
+    }
+
+    @DeleteMapping("/{playlistId}/songs/{songId}")
+    public ResponseEntity<Void> removeSongFromPlaylist(@PathVariable Long playlistId, @PathVariable Long songId) {
+        if (playlistSongService.deleteSongFromPlayListSongByPlayListIdAndSongId(playlistId, songId)) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.notFound().build();
     }
 }

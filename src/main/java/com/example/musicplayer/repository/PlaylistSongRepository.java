@@ -8,5 +8,9 @@ import com.example.musicplayer.entity.PlaylistSong;
 
 public interface PlaylistSongRepository extends JpaRepository<PlaylistSong, Long> {
     List<PlaylistSong> findByPlaylistId(Long playlistId);
+
     void deleteByPlaylistIdAndSongId(Long playlistId, Long songId);
+
+    boolean existsByPlaylistIdAndSongId(Long playlistId, Long songId);
+
 }
