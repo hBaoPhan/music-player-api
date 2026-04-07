@@ -57,9 +57,20 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody RegisterRequest signUpRequest) {
+        if (signUpRequest.getUsername() == null || signUpRequest.getUsername().trim().isEmpty() ||
+            signUpRequest.getPassword() == null || signUpRequest.getPassword().trim().isEmpty() ||
+            signUpRequest.getEmail() == null || signUpRequest.getEmail().trim().isEmpty()) {
+            return ResponseEntity.badRequest().body("Lỗi: Không được để trống thông tin đăng ký!");
+        }
+
         if (userRepository.existsByUsername(signUpRequest.getUsername())) {
             return ResponseEntity.badRequest().body("Lỗi: Username đã tồn tại!");
         }
+        
+        if (userRepository.existsByEmail(signUpRequest.getEmail())) {
+            return ResponseEntity.badRequest().body("Lỗi: Email đã được sử dụng!");
+        }
+
         User user = new User();
         user.setUsername(signUpRequest.getUsername());
         user.setEmail(signUpRequest.getEmail());
