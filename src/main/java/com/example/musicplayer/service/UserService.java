@@ -10,8 +10,12 @@ import jakarta.transaction.Transactional;
 
 import com.example.musicplayer.entity.Song;
 import com.example.musicplayer.entity.User;
+import com.example.musicplayer.entity.UserFavorite;
 import com.example.musicplayer.repository.SongRepository;
+import com.example.musicplayer.repository.UserFavoriteRepository;
 import com.example.musicplayer.repository.UserRepository;
+import java.time.LocalDateTime;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -21,6 +25,9 @@ public class UserService {
 
     @Autowired
     private SongRepository songRepository;
+
+    @Autowired
+    private UserFavoriteRepository userFavoriteRepository;
 
     public List<User> getAllUsers() {
         return userRepository.findAll();
@@ -66,24 +73,24 @@ public class UserService {
     }
 
     @Transactional
-    public User toggleFavorite(Long userId, Long songId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy User"));
-
-        Song song = songRepository.findById(songId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy Bài hát"));
-
-        boolean removed = user.getFavoriteSongs().removeIf(s -> s.getId().equals(song.getId()));
-        if (!removed) {
-            user.getFavoriteSongs().add(song);
+    public void toggleFavorite(Long userId, Long songId) {
+        if (!userRepository.existsById(userId)) {
+            throw new RuntimeException("Không tìm thấy User");
+        }
+        if (!songRepository.existsById(songId)) {
+            throw new RuntimeException("Không tìm thấy Bài hát");
         }
 
-        return userRepository.save(user);
+        userFavoriteRepository.findByUserIdAndSongId(userId, songId)
+                .ifPresentOrElse(
+                    userFavoriteRepository::delete,
+                    () -> userFavoriteRepository.save(new UserFavorite(userId, songId, LocalDateTime.now()))
+                );
     }
 
     public List<Song> getFavoriteSongs(Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy User"));
-        return user.getFavoriteSongs();
+        return userFavoriteRepository.findByUserId(userId).stream()
+                .map(UserFavorite::getSong)
+                .collect(Collectors.toList());
     }
 }
