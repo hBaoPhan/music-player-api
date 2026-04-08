@@ -43,7 +43,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/error").permitAll()
-                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/songs/**", "/api/albums/**", "/api/artists/**").permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/songs/**", "/api/albums/**",
+                                "/api/artists/**")
+                        .permitAll()
                         .anyRequest().authenticated()); //////////// .authenticated()
 
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
@@ -56,7 +58,7 @@ public class SecurityConfig {
         org.springframework.web.cors.CorsConfiguration configuration = new org.springframework.web.cors.CorsConfiguration();
 
         configuration.setAllowedOrigins(
-                java.util.Arrays.asList("http://localhost:5173", "https://xtwr81p2-5173.asse.devtunnels.ms"));
+                java.util.Arrays.asList("http://localhost:5173", "https://spotifour-music-player.vercel.app"));
         configuration.setAllowedMethods(java.util.Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(java.util.Arrays.asList("Authorization", "Content-Type", "X-Requested-With",
                 "accept", "Origin", "Access-Control-Request-Method", "Access-Control-Request-Headers"));
