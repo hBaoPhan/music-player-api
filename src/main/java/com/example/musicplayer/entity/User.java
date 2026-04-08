@@ -3,6 +3,7 @@ package com.example.musicplayer.entity;
 import java.util.ArrayList;
 import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -10,11 +11,9 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "users")
@@ -24,13 +23,13 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(columnDefinition = "NVARCHAR(255)", unique = true, nullable = false)
+    @Column(columnDefinition = "VARCHAR(255)", unique = true, nullable = false)
     private String username;
 
-    @Column(columnDefinition = "NVARCHAR(255)", nullable = false)
+    @Column(columnDefinition = "VARCHAR(255)", nullable = false)
     private String password;
 
-    @Column(columnDefinition = "NVARCHAR(255)", unique = true, nullable = false)
+    @Column(columnDefinition = "VARCHAR(255)", unique = true, nullable = false)
     private String email;
 
     @Column(nullable = false)
@@ -40,20 +39,28 @@ public class User {
     @OneToMany(mappedBy = "user")
     private List<Playlist> playlists;
 
-    @ManyToMany
-    @JoinTable(name = "user_favorites", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "song_id"))
-
-    private List<Song> favoriteSongs = new ArrayList<>();
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserFavorite> favorites = new ArrayList<>();
 
     public User() {
     }
 
+    public List<UserFavorite> getFavorites() {
+        return favorites;
+    }
+
+    public void setFavorites(List<UserFavorite> favorites) {
+        this.favorites = favorites;
+    }
+
     public List<Song> getFavoriteSongs() {
-        return favoriteSongs;
+        return favorites.stream()
+                .map(UserFavorite::getSong)
+                .collect(Collectors.toList());
     }
 
     public void setFavoriteSongs(List<Song> favoriteSongs) {
-        this.favoriteSongs = favoriteSongs;
+        // Compatibility method
     }
 
     public Long getId() {

@@ -9,10 +9,11 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "playlists")
@@ -22,7 +23,7 @@ public class Playlist {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    @Column(columnDefinition = "NVARCHAR(255)", nullable = false)
+    @Column(columnDefinition = "VARCHAR(255)", nullable = false)
     private String name;
     
     @Column(name = "user_id", nullable = false)
@@ -35,13 +36,8 @@ public class Playlist {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    @ManyToMany
-    @JoinTable(
-        name = "playlist_songs",
-        joinColumns = @JoinColumn(name = "playlist_id"),
-        inverseJoinColumns = @JoinColumn(name = "song_id")
-    )
-    private List<Song> songs;
+    @OneToMany(mappedBy = "playlist")
+    private List<PlaylistSong> playlistSongs = new ArrayList<>();
 
     public Playlist() {}
 
@@ -91,11 +87,23 @@ public class Playlist {
         this.user = user;
     }
 
+    public List<PlaylistSong> getPlaylistSongs() {
+        return playlistSongs;
+    }
+
+    public void setPlaylistSongs(List<PlaylistSong> playlistSongs) {
+        this.playlistSongs = playlistSongs;
+    }
+
     public List<Song> getSongs() {
-        return songs;
+        return playlistSongs.stream()
+                .map(PlaylistSong::getSong)
+                .collect(Collectors.toList());
     }
 
     public void setSongs(List<Song> songs) {
-        this.songs = songs;
+        // This method is kept for compatibility but doesn't allow direct setting 
+        // without mapping to PlaylistSong.
+        // It's better to use PlaylistSongService to add songs.
     }
 }
