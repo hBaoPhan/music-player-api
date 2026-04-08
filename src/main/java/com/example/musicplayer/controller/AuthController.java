@@ -18,6 +18,7 @@ import com.example.musicplayer.dto.JwtResponse;
 import com.example.musicplayer.dto.LoginRequest;
 import com.example.musicplayer.dto.RegisterRequest;
 import com.example.musicplayer.dto.ForgotPasswordRequest;
+import com.example.musicplayer.dto.ChangePasswordRequest;
 import com.example.musicplayer.entity.Role;
 import com.example.musicplayer.entity.User;
 import com.example.musicplayer.repository.UserRepository;
@@ -119,5 +120,27 @@ public class AuthController {
             return ResponseEntity.internalServerError()
                     .body("Lỗi hệ thống: Không thể gửi email (kiểm tra cấu hình SMTP).");
         }
+    }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<?> changePassword(@RequestBody ChangePasswordRequest request) {
+        if (request.getUsername() == null || request.getOldPassword() == null || request.getNewPassword() == null) {
+            return ResponseEntity.badRequest().body("Lỗi: Thiếu thông tin đổi mật khẩu!");
+        }
+
+        User user = userRepository.findByUsername(request.getUsername()).orElse(null);
+
+        if (user == null) {
+            return ResponseEntity.badRequest().body("Lỗi: Không tìm thấy người dùng!");
+        }
+
+        if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
+            return ResponseEntity.badRequest().body("Lỗi: Mật khẩu cũ không chính xác!");
+        }
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
+
+        return ResponseEntity.ok("Đổi mật khẩu thành công!");
     }
 }
