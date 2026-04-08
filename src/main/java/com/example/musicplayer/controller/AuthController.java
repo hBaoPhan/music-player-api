@@ -49,11 +49,22 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest) throws Exception {
 
+        String usernameOrEmail = loginRequest.getUsername();
+        String resolvedUsername = usernameOrEmail;
+
+        if (usernameOrEmail != null && usernameOrEmail.contains("@")) {
+            User user = userRepository.findByEmail(usernameOrEmail);
+            if (user == null) {
+                return ResponseEntity.badRequest().body("Lỗi: Không tìm thấy tài khoản với email này!");
+            }
+            resolvedUsername = user.getUsername();
+        }
+
         AuthenticationManager authenticationManager = authenticationConfiguration.getAuthenticationManager();
 
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        loginRequest.getUsername(),
+                        resolvedUsername,
                         loginRequest.getPassword()));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);

@@ -17,13 +17,13 @@ public class CustomUserDetailsService implements UserDetailsService {
     private UserRepository userRepository;
 
 @Override
-public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-    System.out.println(">>> Đang tìm user trong DB với username: " + username); // LOG 1
+public UserDetails loadUserByUsername(String usernameOrEmail) throws UsernameNotFoundException {
+    System.out.println(">>> Đang tìm user trong DB với username/email: " + usernameOrEmail);
 
-    User user = userRepository.findByUsername(username)
-            .orElseThrow(() -> new UsernameNotFoundException("Không tìm thấy người dùng: " + username));
+    User user = userRepository.findByUsernameOrEmail(usernameOrEmail, usernameOrEmail)
+            .orElseThrow(() -> new UsernameNotFoundException("Không tìm thấy người dùng: " + usernameOrEmail));
 
-    System.out.println(">>> Đã tìm thấy user: " + user.getUsername() + ", Role: " + user.getRole()); // LOG 2
+    System.out.println(">>> Đã tìm thấy user: " + user.getUsername() + ", Role: " + user.getRole());
 
     return new CustomUserDetails(user);
 }
