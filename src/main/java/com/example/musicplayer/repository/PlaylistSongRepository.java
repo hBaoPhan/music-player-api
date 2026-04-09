@@ -5,7 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.example.musicplayer.entity.PlaylistSong;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
 public interface PlaylistSongRepository extends JpaRepository<PlaylistSong, Long> {
     List<PlaylistSong> findByPlaylistId(Long playlistId);
