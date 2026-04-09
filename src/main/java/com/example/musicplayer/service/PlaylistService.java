@@ -17,28 +17,28 @@ import jakarta.transaction.Transactional;
 
 @Service
 public class PlaylistService {
-    
+
     @Autowired
     private PlaylistRepository playlistRepository;
-    
+
     @Autowired
     private SongRepository songRepository;
-    
+
     @Autowired
     private PlaylistSongRepository playlistSongRepository;
-    
+
     public List<Playlist> getAllPlaylists() {
         return playlistRepository.findAll();
     }
-    
+
     public Optional<Playlist> getPlaylistById(Long id) {
         return playlistRepository.findById(id);
     }
-    
+
     public Playlist createPlaylist(Playlist playlist) {
         return playlistRepository.save(playlist);
     }
-    
+
     public Optional<Playlist> updatePlaylist(Long id, Playlist playlistDetails) {
         return playlistRepository.findById(id)
                 .map(playlist -> {
@@ -51,21 +51,30 @@ public class PlaylistService {
                     return playlistRepository.save(playlist);
                 });
     }
-    
+
+    @Transactional
     public boolean deletePlaylist(Long id) {
         if (playlistRepository.existsById(id)) {
+            playlistSongRepository.deleteByPlaylistId(id);
             playlistRepository.deleteById(id);
             return true;
         }
         return false;
     }
-    
+
+    @Transactional
+    public void deletePlaylistsByUserId(Long userId) {
+        playlistSongRepository.deleteByUserId(userId);
+        playlistRepository.deleteByUserId(userId);
+    }
+
     public List<Playlist> getPlaylistsByUser(Long userId) {
         return playlistRepository.findByUserId(userId);
     }
-    @Transactional 
+
+    @Transactional
     public Playlist addSongToPlaylist(Long playlistId, Long songId) {
-        // Tìm song av playlist 
+        // Tìm song av playlist
         Playlist playlist = playlistRepository.findById(playlistId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy Playlist"));
 
@@ -74,8 +83,7 @@ public class PlaylistService {
 
         if (!playlistSongRepository.existsByPlaylistIdAndSongId(playlistId, songId)) {
             PlaylistSong mapping = new PlaylistSong(
-                playlistId, songId, LocalDateTime.now()
-            );
+                    playlistId, songId, LocalDateTime.now());
             playlistSongRepository.save(mapping);
         }
         return playlist;

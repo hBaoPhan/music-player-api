@@ -8,4 +8,6 @@ import com.example.musicplayer.entity.Playlist;
 
 public interface PlaylistRepository extends JpaRepository<Playlist, Long> {
     List<Playlist> findByUserId(Long userId);
+
+    void deleteByUserId(Long userId);
 }

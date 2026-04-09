@@ -12,6 +12,7 @@ import com.example.musicplayer.entity.Song;
 import com.example.musicplayer.entity.User;
 import com.example.musicplayer.entity.UserFavorite;
 import com.example.musicplayer.repository.SongRepository;
+import com.example.musicplayer.repository.PlaylistSongRepository;
 import com.example.musicplayer.repository.UserFavoriteRepository;
 import com.example.musicplayer.repository.UserRepository;
 import java.time.LocalDateTime;
@@ -20,6 +21,8 @@ import java.util.stream.Collectors;
 @Service
 public class UserService {
 
+    private final PlaylistService playlistService;
+
     @Autowired
     private UserRepository userRepository;
 
@@ -27,7 +30,14 @@ public class UserService {
     private SongRepository songRepository;
 
     @Autowired
+    private PlaylistSongRepository playlistSongRepository;
+
+    @Autowired
     private UserFavoriteRepository userFavoriteRepository;
+
+    UserService(PlaylistService playlistService) {
+        this.playlistService = playlistService;
+    }
 
     public List<User> getAllUsers() {
         return userRepository.findAll();
@@ -61,8 +71,16 @@ public class UserService {
                 });
     }
 
+    @Transactional
     public boolean deleteUser(Long id) {
         if (userRepository.existsById(id)) {
+
+            playlistSongRepository.deleteByUserId(id);
+
+            playlistService.deletePlaylistsByUserId(id);
+
+            userFavoriteRepository.deleteByUserId(id);
+
             userRepository.deleteById(id);
             return true;
         }
