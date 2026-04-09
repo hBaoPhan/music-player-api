@@ -45,14 +45,17 @@ public class UserService {
         return userRepository.findById(id)
                 .map(user -> {
                     user.setUsername(userDetails.getUsername());
-                    user.setPassword(userDetails.getPassword());
+                    if (userDetails.getPassword() != null && !userDetails.getPassword().isEmpty()) {
+                        user.setPassword(userDetails.getPassword());
+                    }
                     user.setEmail(userDetails.getEmail());
-                    user.setRole(userDetails.getRole());
+
+                    if (userDetails.getRole() != null) {
+                        user.setRole(userDetails.getRole());
+                    }
+
                     if (userDetails.getPlaylists() != null) {
                         user.setPlaylists(userDetails.getPlaylists());
-                    }
-                    if (userDetails.getFavoriteSongs() != null) {
-                        user.setFavoriteSongs(userDetails.getFavoriteSongs());
                     }
                     return userRepository.save(user);
                 });
@@ -83,9 +86,8 @@ public class UserService {
 
         userFavoriteRepository.findByUserIdAndSongId(userId, songId)
                 .ifPresentOrElse(
-                    userFavoriteRepository::delete,
-                    () -> userFavoriteRepository.save(new UserFavorite(userId, songId, LocalDateTime.now()))
-                );
+                        userFavoriteRepository::delete,
+                        () -> userFavoriteRepository.save(new UserFavorite(userId, songId, LocalDateTime.now())));
     }
 
     public List<Song> getFavoriteSongs(Long userId) {

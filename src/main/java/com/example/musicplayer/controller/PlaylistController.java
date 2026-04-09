@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import com.example.musicplayer.dto.PlaylistDTO;
 import com.example.musicplayer.dto.SongDTO;
@@ -55,6 +56,7 @@ public class PlaylistController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or @playlistService.isOwner(#id, principal.user.id)")
     public ResponseEntity<PlaylistDTO> updatePlaylist(@PathVariable Long id, @RequestBody Playlist playlistDetails) {
         return playlistService.updatePlaylist(id, playlistDetails)
                 .map(PlaylistDTO::new)
@@ -63,6 +65,7 @@ public class PlaylistController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or @playlistService.isOwner(#id, principal.user.id)")
     public ResponseEntity<Void> deletePlaylist(@PathVariable Long id) {
         if (playlistService.deletePlaylist(id)) {
             return ResponseEntity.noContent().build();
@@ -88,12 +91,14 @@ public class PlaylistController {
     }
 
     @PostMapping("/{playlistId}/songs/{songId}")
+    @PreAuthorize("hasRole('ADMIN') or @playlistService.isOwner(#playlistId, principal.user.id)")
     public ResponseEntity<PlaylistDTO> addSong(@PathVariable Long playlistId, @PathVariable Long songId) {
         Playlist updatedPlaylist = playlistService.addSongToPlaylist(playlistId, songId);
         return ResponseEntity.ok(new PlaylistDTO(updatedPlaylist));
     }
 
     @DeleteMapping("/{playlistId}/songs/{songId}")
+    @PreAuthorize("hasRole('ADMIN') or @playlistService.isOwner(#playlistId, principal.user.id)")
     public ResponseEntity<Void> removeSongFromPlaylist(@PathVariable Long playlistId, @PathVariable Long songId) {
         if (playlistSongService.deleteSongFromPlayListSongByPlayListIdAndSongId(playlistId, songId)) {
             return ResponseEntity.noContent().build();

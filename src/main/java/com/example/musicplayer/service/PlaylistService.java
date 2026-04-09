@@ -80,4 +80,10 @@ public class PlaylistService {
         }
         return playlist;
     }
+
+    public boolean isOwner(Long playlistId, Long userId) {
+        return playlistRepository.findById(playlistId)
+                .map(playlist -> playlist.getUserId().equals(userId))
+                .orElse(false);
+    }
 }
