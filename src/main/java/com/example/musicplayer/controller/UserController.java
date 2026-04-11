@@ -1,6 +1,8 @@
 package com.example.musicplayer.controller;
 
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +25,7 @@ import com.example.musicplayer.dto.UserDTO;
 import com.example.musicplayer.entity.Song;
 import com.example.musicplayer.entity.User;
 import com.example.musicplayer.service.UserService;
+import com.example.musicplayer.security.JwtTokenProvider;
 
 @RestController
 @RequestMapping("/api/users")
@@ -31,6 +34,9 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private JwtTokenProvider tokenProvider;
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
@@ -58,10 +64,15 @@ public class UserController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or #id == principal.user.id")
-    public ResponseEntity<UserDTO> updateUser(@PathVariable Long id, @RequestBody User userDetails) {
+    public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody User userDetails) {
         return userService.updateUser(id, userDetails)
-                .map(UserDTO::new)
-                .map(ResponseEntity::ok)
+                .map(user -> {
+                    String newToken = tokenProvider.generateTokenFromUsername(user.getUsername());
+                    Map<String, Object> response = new HashMap<>();
+                    response.put("user", new UserDTO(user));
+                    response.put("token", newToken);
+                    return ResponseEntity.ok(response);
+                })
                 .orElse(ResponseEntity.notFound().build());
     }
 

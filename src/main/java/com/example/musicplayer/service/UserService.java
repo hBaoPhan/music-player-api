@@ -57,11 +57,11 @@ public class UserService {
                     if (userDetails.getUsername() != null && !userDetails.getUsername().trim().isEmpty()) {
                         user.setUsername(userDetails.getUsername());
                     }
-                    
+
                     if (userDetails.getPassword() != null && !userDetails.getPassword().isEmpty()) {
                         user.setPassword(userDetails.getPassword());
                     }
-                    
+
                     if (userDetails.getEmail() != null && !userDetails.getEmail().trim().isEmpty()) {
                         user.setEmail(userDetails.getEmail());
                     }
@@ -69,10 +69,10 @@ public class UserService {
                     if (userDetails.getRole() != null) {
                         user.setRole(userDetails.getRole());
                     }
-                    
-                    if (userDetails.getProvider() != null) {
-                        user.setProvider(userDetails.getProvider());
-                    }
+
+                    // if (userDetails.getProvider() != null) {
+                    // user.setProvider(userDetails.getProvider());
+                    // }
 
                     if (userDetails.getPlaylists() != null) {
                         user.setPlaylists(userDetails.getPlaylists());
