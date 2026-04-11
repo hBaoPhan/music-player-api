@@ -34,7 +34,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
-
         try {
             String jwt = getJwtFromRequest(request);
 
@@ -51,7 +50,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         } catch (Exception ex) {
             System.out.println("Could not set user authentication in security context: " + ex.getMessage());
         }
-
         filterChain.doFilter(request, response);
     }
 

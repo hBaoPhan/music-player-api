@@ -26,7 +26,7 @@ public class User {
     @Column(columnDefinition = "VARCHAR(255)", unique = true, nullable = false)
     private String username;
 
-    @Column(columnDefinition = "VARCHAR(255)", nullable = false)
+    @Column(columnDefinition = "VARCHAR(255)")
     private String password;
 
     @Column(columnDefinition = "VARCHAR(255)", unique = true, nullable = false)
@@ -35,6 +35,10 @@ public class User {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Role role;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "provider")
+    private AuthProvider provider = AuthProvider.LOCAL;
 
     @OneToMany(mappedBy = "user")
     private List<Playlist> playlists;
@@ -85,6 +89,14 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public AuthProvider getProvider() {
+        return provider;
+    }
+
+    public void setProvider(AuthProvider provider) {
+        this.provider = provider;
     }
 
     public String getEmail() {

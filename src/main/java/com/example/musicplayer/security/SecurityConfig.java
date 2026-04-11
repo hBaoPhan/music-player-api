@@ -29,6 +29,12 @@ public class SecurityConfig {
     @Autowired
     private JwtAuthenticationFilter jwtAuthenticationFilter;
 
+    @Autowired
+    private com.example.musicplayer.security.oauth2.CustomOAuth2UserService customOAuth2UserService;
+
+    @Autowired
+    private com.example.musicplayer.security.oauth2.OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -55,7 +61,11 @@ public class SecurityConfig {
                                 "/api/albums", "/api/albums/**",
                                 "/api/artists", "/api/artists/**")
                         .permitAll()
-                        .anyRequest().authenticated());
+                        .anyRequest().authenticated())
+                .oauth2Login(oauth2 -> oauth2
+                        .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
+                        .successHandler(oAuth2AuthenticationSuccessHandler)
+                );
 
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 

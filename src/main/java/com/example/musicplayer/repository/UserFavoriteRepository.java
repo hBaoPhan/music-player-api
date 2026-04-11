@@ -11,7 +11,9 @@ import com.example.musicplayer.entity.UserFavorite;
 @Repository
 public interface UserFavoriteRepository extends JpaRepository<UserFavorite, Long> {
     List<UserFavorite> findByUserId(Long userId);
+
     Optional<UserFavorite> findByUserIdAndSongId(Long userId, Long songId);
+
     void deleteByUserIdAndSongId(Long userId, Long songId);
 
     void deleteByUserId(Long userId);
