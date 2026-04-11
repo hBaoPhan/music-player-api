@@ -54,14 +54,24 @@ public class UserService {
     public Optional<User> updateUser(Long id, User userDetails) {
         return userRepository.findById(id)
                 .map(user -> {
-                    user.setUsername(userDetails.getUsername());
+                    if (userDetails.getUsername() != null && !userDetails.getUsername().trim().isEmpty()) {
+                        user.setUsername(userDetails.getUsername());
+                    }
+                    
                     if (userDetails.getPassword() != null && !userDetails.getPassword().isEmpty()) {
                         user.setPassword(userDetails.getPassword());
                     }
-                    user.setEmail(userDetails.getEmail());
+                    
+                    if (userDetails.getEmail() != null && !userDetails.getEmail().trim().isEmpty()) {
+                        user.setEmail(userDetails.getEmail());
+                    }
 
                     if (userDetails.getRole() != null) {
                         user.setRole(userDetails.getRole());
+                    }
+                    
+                    if (userDetails.getProvider() != null) {
+                        user.setProvider(userDetails.getProvider());
                     }
 
                     if (userDetails.getPlaylists() != null) {
