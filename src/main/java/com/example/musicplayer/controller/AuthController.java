@@ -73,7 +73,6 @@ public class AuthController {
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        // Nếu tài khoản đã bị vô hiệu hóa trước đó, tự động kích hoạt lại
         User loggedInUser = userRepository.findByUsername(resolvedUsername).orElse(null);
         boolean wasReactivated = false;
         if (loggedInUser != null && !loggedInUser.isActive()) {

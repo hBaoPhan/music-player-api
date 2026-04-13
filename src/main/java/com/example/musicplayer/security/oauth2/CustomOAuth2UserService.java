@@ -5,6 +5,7 @@ import com.example.musicplayer.entity.CustomUserDetails;
 import com.example.musicplayer.entity.Role;
 import com.example.musicplayer.entity.User;
 import com.example.musicplayer.repository.UserRepository;
+import com.example.musicplayer.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
@@ -18,6 +19,9 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private UserService userService;
+
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
         OAuth2User oAuth2User = super.loadUser(userRequest);
@@ -30,7 +34,15 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         User user = userRepository.findByEmail(email);
 
+        boolean wasReactivated = false;
+
         if (user != null) {
+            // Nếu user tồn tại nhưng đã bị vô hiệu hóa, tự động kích hoạt lại
+            if (!user.isActive()) {
+                userService.reactivateUser(user.getId());
+                user.setActive(true); // cập nhật local object cho đúng
+                wasReactivated = true;
+            }
             if (user.getProvider() != AuthProvider.GOOGLE) {
                 user.setProvider(AuthProvider.GOOGLE);
                 userRepository.save(user);
@@ -52,6 +64,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             user = userRepository.save(user);
         }
 
-        return new CustomUserDetails(user, oAuth2User.getAttributes());
+        return new CustomUserDetails(user, oAuth2User.getAttributes(), wasReactivated);
     }
 }

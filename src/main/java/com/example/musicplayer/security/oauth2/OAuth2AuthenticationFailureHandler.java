@@ -19,12 +19,10 @@ public class OAuth2AuthenticationFailureHandler extends SimpleUrlAuthenticationF
 
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
-                                        AuthenticationException exception) throws IOException, ServletException {
+            AuthenticationException exception) throws IOException, ServletException {
         System.err.println(">>> Lỗi xác thực OAuth2: " + exception.getMessage());
         exception.printStackTrace();
 
-        // Trích xuất trang đăng nhập frontend từ redirect url (giả sử nó là localhost:5173/oauth2/redirect)
-        // Chúng ta sẽ redirect về trang login của frontend kèm theo lỗi
         String targetUrl = UriComponentsBuilder.fromUriString(frontendRedirectUrl.replace("/oauth2/redirect", "/login"))
                 .queryParam("error", exception.getLocalizedMessage())
                 .build().toUriString();

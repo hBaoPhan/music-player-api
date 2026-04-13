@@ -13,6 +13,7 @@ public class CustomUserDetails implements UserDetails, OAuth2User {
 
     private final User user;
     private Map<String, Object> attributes;
+    private boolean reactivated;
 
     public CustomUserDetails(User user) {
         this.user = user;
@@ -21,6 +22,12 @@ public class CustomUserDetails implements UserDetails, OAuth2User {
     public CustomUserDetails(User user, Map<String, Object> attributes) {
         this.user = user;
         this.attributes = attributes;
+    }
+
+    public CustomUserDetails(User user, Map<String, Object> attributes, boolean reactivated) {
+        this.user = user;
+        this.attributes = attributes;
+        this.reactivated = reactivated;
     }
 
     @Override
@@ -66,4 +73,9 @@ public class CustomUserDetails implements UserDetails, OAuth2User {
     public User getUser() {
         return user;
     }
-}
+
+    public boolean isReactivated() {
+        return reactivated;
+    }
+}
+

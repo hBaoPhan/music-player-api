@@ -16,12 +16,27 @@ public class JwtResponse {
         this.reactivated = reactivated;
     }
 
-    public String getToken() { return token; }
-    public void setToken(String token) { this.token = token; }
+    public String getToken() {
+        return token;
+    }
 
-    public String getType() { return type; }
-    public void setType(String type) { this.type = type; }
+    public void setToken(String token) {
+        this.token = token;
+    }
 
-    public boolean isReactivated() { return reactivated; }
-    public void setReactivated(boolean reactivated) { this.reactivated = reactivated; }
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public boolean isReactivated() {
+        return reactivated;
+    }
+
+    public void setReactivated(boolean reactivated) {
+        this.reactivated = reactivated;
+    }
 }

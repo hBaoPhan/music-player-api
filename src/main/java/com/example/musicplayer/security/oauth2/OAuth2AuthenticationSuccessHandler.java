@@ -1,5 +1,6 @@
 package com.example.musicplayer.security.oauth2;
 
+import com.example.musicplayer.entity.CustomUserDetails;
 import com.example.musicplayer.security.JwtTokenProvider;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -29,8 +30,14 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
         String token = tokenProvider.generateToken(authentication);
 
+        boolean wasReactivated = false;
+        if (authentication.getPrincipal() instanceof CustomUserDetails principal) {
+            wasReactivated = principal.isReactivated();
+        }
+
         String targetUrl = UriComponentsBuilder.fromUriString(frontendRedirectUrl)
                 .queryParam("token", token)
+                .queryParam("reactivated", wasReactivated)
                 .build().toUriString();
 
         getRedirectStrategy().sendRedirect(request, response, targetUrl);
