@@ -29,7 +29,6 @@ public class AlbumService {
     }
 
     public Album createAlbum(Album album) {
-        // Frontend gửi { artist: { id: X } } — extract artistId từ nested object
         if (album.getArtistId() == null && album.getArtist() != null) {
             album.setArtistId(album.getArtist().getId());
         }
@@ -66,7 +65,7 @@ public class AlbumService {
     public boolean deleteAlbum(Long id) {
         return albumRepository.findById(id)
                 .map(album -> {
-                    // Cascade: deactivate tất cả song thuộc album
+
                     songRepository.deactivateByAlbumId(id);
                     album.setActive(false);
                     albumRepository.save(album);

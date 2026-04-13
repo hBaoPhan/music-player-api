@@ -24,6 +24,7 @@ import com.example.musicplayer.entity.User;
 import com.example.musicplayer.repository.UserRepository;
 import com.example.musicplayer.security.JwtTokenProvider;
 import com.example.musicplayer.service.EmailService;
+import com.example.musicplayer.service.UserService;
 import java.util.Random;
 
 @RestController
@@ -45,6 +46,9 @@ public class AuthController {
 
     @Autowired
     private EmailService emailService;
+
+    @Autowired
+    private UserService userService;
 
     @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest) throws Exception {
@@ -68,9 +72,17 @@ public class AuthController {
                         loginRequest.getPassword()));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        String jwt = tokenProvider.generateToken(authentication);
 
-        return ResponseEntity.ok(new JwtResponse(jwt));
+        // Nếu tài khoản đã bị vô hiệu hóa trước đó, tự động kích hoạt lại
+        User loggedInUser = userRepository.findByUsername(resolvedUsername).orElse(null);
+        boolean wasReactivated = false;
+        if (loggedInUser != null && !loggedInUser.isActive()) {
+            userService.reactivateUser(loggedInUser.getId());
+            wasReactivated = true;
+        }
+
+        String jwt = tokenProvider.generateToken(authentication);
+        return ResponseEntity.ok(new JwtResponse(jwt, wasReactivated));
     }
 
     @PostMapping("/register")

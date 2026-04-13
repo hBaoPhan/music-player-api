@@ -11,7 +11,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     User findByEmail(String email);
 
-    // Auth: chỉ tìm user đang active
+    // Auth: tìm user không phân biệt trạng thái — để hỗ trợ tự động kích hoạt lại khi login
+    Optional<User> findByUsernameOrEmail(String username, String email);
+
+    // Auth: chỉ tìm user đang active (dùng nơi không cần tự reactivate)
     Optional<User> findByUsernameOrEmailAndIsActiveTrue(String username, String email);
 
     boolean existsByUsername(String username);

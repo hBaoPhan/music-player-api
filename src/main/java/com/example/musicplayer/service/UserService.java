@@ -13,7 +13,7 @@ import com.example.musicplayer.entity.User;
 import com.example.musicplayer.entity.UserFavorite;
 import com.example.musicplayer.repository.PlaylistRepository;
 import com.example.musicplayer.repository.SongRepository;
-import com.example.musicplayer.repository.PlaylistSongRepository;
+
 import com.example.musicplayer.repository.UserFavoriteRepository;
 import com.example.musicplayer.repository.UserRepository;
 import java.time.LocalDateTime;
@@ -21,8 +21,6 @@ import java.util.stream.Collectors;
 
 @Service
 public class UserService {
-
-    private final PlaylistService playlistService;
 
     @Autowired
     private UserRepository userRepository;
@@ -34,14 +32,7 @@ public class UserService {
     private SongRepository songRepository;
 
     @Autowired
-    private PlaylistSongRepository playlistSongRepository;
-
-    @Autowired
     private UserFavoriteRepository userFavoriteRepository;
-
-    UserService(PlaylistService playlistService) {
-        this.playlistService = playlistService;
-    }
 
     public List<User> getAllUsers() {
         return userRepository.findAllByIsActiveTrue();
@@ -87,11 +78,19 @@ public class UserService {
                 .map(user -> {
                     user.setActive(false);
                     userRepository.save(user);
-                    // Cascade: ẩn tất cả playlist của user
                     playlistRepository.deactivateByUserId(id);
                     return true;
                 })
                 .orElse(false);
+    }
+
+    @Transactional
+    public void reactivateUser(Long id) {
+        userRepository.findById(id).ifPresent(user -> {
+            user.setActive(true);
+            userRepository.save(user);
+            playlistRepository.reactivateByUserId(id);
+        });
     }
 
     public User findByUsername(String username) {
