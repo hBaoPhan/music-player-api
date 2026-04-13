@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import com.example.musicplayer.dto.PlaylistDTO;
 import com.example.musicplayer.dto.SongDTO;
@@ -64,8 +66,12 @@ public class UserController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or #id == principal.user.id")
-    public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody User userDetails) {
-        return userService.updateUser(id, userDetails)
+    public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody User userDetails,
+            Authentication authentication) {
+        boolean isAdmin = authentication.getAuthorities()
+                .contains(new SimpleGrantedAuthority("ROLE_ADMIN"));
+
+        return userService.updateUser(id, userDetails, isAdmin)
                 .map(user -> {
                     String newToken = tokenProvider.generateTokenFromUsername(user.getUsername());
                     Map<String, Object> response = new HashMap<>();
@@ -79,7 +85,7 @@ public class UserController {
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
-        if (userService.deleteUser(id)) {
+        if (userService.deactivateUser(id)) {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.notFound().build();

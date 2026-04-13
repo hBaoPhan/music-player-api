@@ -8,6 +8,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.EnumType;
 
 @Entity
 @Table(name = "songs")
@@ -26,8 +28,12 @@ public class Song {
 
     private Integer playCount = 0;
 
+    @Column(name = "is_active", nullable = false)
+    private boolean isActive = true;
+
+    @Enumerated(EnumType.STRING)
     @Column(columnDefinition = "VARCHAR(255)")
-    private String category;
+    private Genre genre;
 
     @ManyToOne
     @JoinColumn(name = "artist_id")
@@ -89,11 +95,19 @@ public class Song {
         this.album = album;
     }
 
-    public String getCategory() {
-        return category;
+    public Genre getGenre() {
+        return genre;
     }
 
-    public void setCategory(String category) {
-        this.category = category;
+    public void setGenre(Genre genre) {
+        this.genre = genre;
+    }
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean isActive) {
+        this.isActive = isActive;
     }
 }

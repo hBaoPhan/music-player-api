@@ -27,6 +27,9 @@ public class Artist {
     @Column(name = "avatar_url", columnDefinition = "TEXT")
     private String avatarUrl;
 
+    @Column(name = "is_active", nullable = false)
+    private boolean isActive = true;
+
     @OneToMany(mappedBy = "artist")
     private List<Album> albums;
 
@@ -88,5 +91,13 @@ public class Artist {
 
     public void setSongs(List<Song> songs) {
         this.songs = songs;
+    }
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean isActive) {
+        this.isActive = isActive;
     }
 }

@@ -3,6 +3,7 @@ package com.example.musicplayer.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.example.musicplayer.entity.User;
+import java.util.List;
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long> {
@@ -10,9 +11,17 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     User findByEmail(String email);
 
-    Optional<User> findByUsernameOrEmail(String username, String email);
+    // Auth: chỉ tìm user đang active
+    Optional<User> findByUsernameOrEmailAndIsActiveTrue(String username, String email);
 
     boolean existsByUsername(String username);
 
     boolean existsByEmail(String email);
+
+    // Soft delete queries
+    List<User> findAllByIsActiveTrue();
+
+    Optional<User> findByIdAndIsActiveTrue(Long id);
+
+    boolean existsByIdAndIsActiveTrue(Long id);
 }

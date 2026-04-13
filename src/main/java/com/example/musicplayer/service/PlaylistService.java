@@ -28,6 +28,7 @@ public class PlaylistService {
     private PlaylistSongRepository playlistSongRepository;
 
     public List<Playlist> getAllPlaylists() {
+        // Trả về tất cả playlist active — dùng nội bộ (admin)
         return playlistRepository.findAll();
     }
 
@@ -54,22 +55,32 @@ public class PlaylistService {
 
     @Transactional
     public boolean deletePlaylist(Long id) {
-        if (playlistRepository.existsById(id)) {
-            playlistSongRepository.deleteByPlaylistId(id);
-            playlistRepository.deleteById(id);
-            return true;
-        }
-        return false;
+        return playlistRepository.findById(id)
+                .map(playlist -> {
+                    playlist.setActive(false);
+                    playlistRepository.save(playlist);
+                    return true;
+                })
+                .orElse(false);
     }
 
     @Transactional
+    public void deactivatePlaylistsByUserId(Long userId) {
+        // Soft delete: ẩn playlist, không xóa dự liệu
+        playlistRepository.deactivateByUserId(userId);
+    }
+
+    /**
+     * @deprecated Sử dụng deactivatePlaylistsByUserId() thay thế
+     */
+    @Deprecated
+    @Transactional
     public void deletePlaylistsByUserId(Long userId) {
-        playlistSongRepository.deleteByUserId(userId);
-        playlistRepository.deleteByUserId(userId);
+        deactivatePlaylistsByUserId(userId);
     }
 
     public List<Playlist> getPlaylistsByUser(Long userId) {
-        return playlistRepository.findByUserId(userId);
+        return playlistRepository.findByUserIdAndIsActiveTrue(userId);
     }
 
     @Transactional

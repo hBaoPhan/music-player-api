@@ -37,6 +37,9 @@ public class Album {
     @Column(name = "release_date")
     private LocalDate releaseDate;
 
+    @Column(name = "is_active", nullable = false)
+    private boolean isActive = true;
+
     @OneToMany(mappedBy = "album")
     private List<Song> songs;
 
@@ -103,5 +106,13 @@ public class Album {
 
     public void setSongs(List<Song> songs) {
         this.songs = songs;
+    }
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean isActive) {
+        this.isActive = isActive;
     }
 }

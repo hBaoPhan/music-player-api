@@ -13,6 +13,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.PrePersist;
 import java.util.stream.Collectors;
 
 @Entity
@@ -40,6 +41,9 @@ public class User {
     @Column(name = "provider")
     private AuthProvider provider = AuthProvider.LOCAL;
 
+    @Column(name = "is_active", nullable = false)
+    private boolean isActive = true;
+
     @OneToMany(mappedBy = "user")
     private List<Playlist> playlists;
 
@@ -47,6 +51,19 @@ public class User {
     private List<UserFavorite> favorites = new ArrayList<>();
 
     public User() {
+    }
+
+    @PrePersist
+    protected void onCreate() {
+        this.isActive = true;
+    }
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean isActive) {
+        this.isActive = isActive;
     }
 
     public List<UserFavorite> getFavorites() {

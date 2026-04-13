@@ -16,7 +16,7 @@ public class SongService {
     private SongRepository songRepository;
     
     public List<Song> getAllSongs() {
-        return songRepository.findAll();
+        return songRepository.findAllByIsActiveTrue();
     }
     
     public Optional<Song> getSongById(Long id) {
@@ -36,28 +36,30 @@ public class SongService {
                     song.setAudioUrl(songDetails.getAudioUrl());
                     song.setDuration(songDetails.getDuration());
                     song.setPlayCount(songDetails.getPlayCount());
-                    song.setCategory(songDetails.getCategory());
+                    song.setGenre(songDetails.getGenre());
                     return songRepository.save(song);
                 });
     }
     
     public boolean deleteSong(Long id) {
-        if (songRepository.existsById(id)) {
-            songRepository.deleteById(id);
-            return true;
-        }
-        return false;
+        return songRepository.findById(id)
+                .map(song -> {
+                    song.setActive(false);
+                    songRepository.save(song);
+                    return true;
+                })
+                .orElse(false);
     }
     
     public List<Song> getSongsByArtist(Long artistId) {
-        return songRepository.findByArtistId(artistId);
+        return songRepository.findByArtistIdAndIsActiveTrue(artistId);
     }
-    
+
     public List<Song> getSongsByAlbum(Long albumId) {
-        return songRepository.findByAlbumId(albumId);
+        return songRepository.findByAlbumIdAndIsActiveTrue(albumId);
     }
-    
+
     public List<Song> getSongsByTitle(String title) {
-        return songRepository.findByTitle(title);
+        return songRepository.findByTitleAndIsActiveTrue(title);
     }
 }

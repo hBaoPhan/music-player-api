@@ -16,15 +16,19 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Autowired
     private UserRepository userRepository;
 
-@Override
-public UserDetails loadUserByUsername(String usernameOrEmail) throws UsernameNotFoundException {
-    System.out.println(">>> Đang tìm user trong DB với username/email: " + usernameOrEmail);
+    @Override
+    public UserDetails loadUserByUsername(String usernameOrEmail) throws UsernameNotFoundException {
+        System.out.println(">>> Đang tìm user trong DB với username/email: " + usernameOrEmail);
 
-    User user = userRepository.findByUsernameOrEmail(usernameOrEmail, usernameOrEmail)
-            .orElseThrow(() -> new UsernameNotFoundException("Không tìm thấy người dùng: " + usernameOrEmail));
+        User user = userRepository.findByUsernameOrEmailAndIsActiveTrue(usernameOrEmail, usernameOrEmail)
+                .orElseThrow(() -> new UsernameNotFoundException("Không tìm thấy người dùng: " + usernameOrEmail));
 
-    System.out.println(">>> Đã tìm thấy user: " + user.getUsername() + ", Role: " + user.getRole());
+        if (!user.isActive()) {
+            throw new UsernameNotFoundException("Tài khoản đã bị vô hiệu hóa: " + usernameOrEmail);
+        }
 
-    return new CustomUserDetails(user);
-}
+        System.out.println(">>> Đã tìm thấy user: " + user.getUsername() + ", Role: " + user.getRole());
+
+        return new CustomUserDetails(user);
+    }
 }

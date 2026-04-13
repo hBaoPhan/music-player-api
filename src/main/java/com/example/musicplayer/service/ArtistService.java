@@ -5,18 +5,23 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import jakarta.transaction.Transactional;
 
 import com.example.musicplayer.entity.Artist;
 import com.example.musicplayer.repository.ArtistRepository;
+import com.example.musicplayer.repository.SongRepository;
 
 @Service
 public class ArtistService {
     
     @Autowired
     private ArtistRepository artistRepository;
+
+    @Autowired
+    private SongRepository songRepository;
     
     public List<Artist> getAllArtists() {
-        return artistRepository.findAll();
+        return artistRepository.findAllByIsActiveTrue();
     }
     
     public Optional<Artist> getArtistById(Long id) {
@@ -43,12 +48,17 @@ public class ArtistService {
                 });
     }
     
+    @Transactional
     public boolean deleteArtist(Long id) {
-        if (artistRepository.existsById(id)) {
-            artistRepository.deleteById(id);
-            return true;
-        }
-        return false;
+        return artistRepository.findById(id)
+                .map(artist -> {
+                    // Cascade: deactivate tất cả song của artist
+                    songRepository.deactivateByArtistId(id);
+                    artist.setActive(false);
+                    artistRepository.save(artist);
+                    return true;
+                })
+                .orElse(false);
     }
     
     public Artist findByName(String name) {

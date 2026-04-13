@@ -2,13 +2,15 @@ package com.example.musicplayer.dto;
 
 import com.example.musicplayer.entity.Song;
 
+import com.example.musicplayer.entity.Genre;
+
 public class SongDTO {
     private Long id;
     private String title;
     private String audioUrl;
     private Integer duration;
     private Integer playCount;
-    private String category;
+    private Genre genre;
     private ArtistDTO artist;
     private AlbumDTO album;
 
@@ -21,7 +23,7 @@ public class SongDTO {
             this.audioUrl = song.getAudioUrl();
             this.duration = song.getDuration();
             this.playCount = song.getPlayCount();
-            this.category = song.getCategory();
+            this.genre = song.getGenre();
             if (song.getArtist() != null) {
                 this.artist = new ArtistDTO(song.getArtist());
             }
@@ -87,11 +89,11 @@ public class SongDTO {
         this.album = album;
     }
 
-    public String getCategory() {
-        return category;
+    public Genre getGenre() {
+        return genre;
     }
 
-    public void setCategory(String category) {
-        this.category = category;
+    public void setGenre(Genre genre) {
+        this.genre = genre;
     }
 }

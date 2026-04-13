@@ -36,6 +36,9 @@ public class Playlist {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
+    @Column(name = "is_active", nullable = false)
+    private boolean isActive = true;
+
     @OneToMany(mappedBy = "playlist")
     private List<PlaylistSong> playlistSongs = new ArrayList<>();
 
@@ -105,5 +108,13 @@ public class Playlist {
         // This method is kept for compatibility but doesn't allow direct setting 
         // without mapping to PlaylistSong.
         // It's better to use PlaylistSongService to add songs.
+    }
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean isActive) {
+        this.isActive = isActive;
     }
 }

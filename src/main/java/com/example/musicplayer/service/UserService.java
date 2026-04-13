@@ -11,6 +11,7 @@ import jakarta.transaction.Transactional;
 import com.example.musicplayer.entity.Song;
 import com.example.musicplayer.entity.User;
 import com.example.musicplayer.entity.UserFavorite;
+import com.example.musicplayer.repository.PlaylistRepository;
 import com.example.musicplayer.repository.SongRepository;
 import com.example.musicplayer.repository.PlaylistSongRepository;
 import com.example.musicplayer.repository.UserFavoriteRepository;
@@ -27,6 +28,9 @@ public class UserService {
     private UserRepository userRepository;
 
     @Autowired
+    private PlaylistRepository playlistRepository;
+
+    @Autowired
     private SongRepository songRepository;
 
     @Autowired
@@ -40,18 +44,18 @@ public class UserService {
     }
 
     public List<User> getAllUsers() {
-        return userRepository.findAll();
+        return userRepository.findAllByIsActiveTrue();
     }
 
     public Optional<User> getUserById(Long id) {
-        return userRepository.findById(id);
+        return userRepository.findByIdAndIsActiveTrue(id);
     }
 
     public User createUser(User user) {
         return userRepository.save(user);
     }
 
-    public Optional<User> updateUser(Long id, User userDetails) {
+    public Optional<User> updateUser(Long id, User userDetails, boolean isCallerAdmin) {
         return userRepository.findById(id)
                 .map(user -> {
                     if (userDetails.getUsername() != null && !userDetails.getUsername().trim().isEmpty()) {
@@ -66,13 +70,9 @@ public class UserService {
                         user.setEmail(userDetails.getEmail());
                     }
 
-                    if (userDetails.getRole() != null) {
+                    if (isCallerAdmin && userDetails.getRole() != null) {
                         user.setRole(userDetails.getRole());
                     }
-
-                    // if (userDetails.getProvider() != null) {
-                    // user.setProvider(userDetails.getProvider());
-                    // }
 
                     if (userDetails.getPlaylists() != null) {
                         user.setPlaylists(userDetails.getPlaylists());
@@ -82,19 +82,16 @@ public class UserService {
     }
 
     @Transactional
-    public boolean deleteUser(Long id) {
-        if (userRepository.existsById(id)) {
-
-            playlistSongRepository.deleteByUserId(id);
-
-            playlistService.deletePlaylistsByUserId(id);
-
-            userFavoriteRepository.deleteByUserId(id);
-
-            userRepository.deleteById(id);
-            return true;
-        }
-        return false;
+    public boolean deactivateUser(Long id) {
+        return userRepository.findById(id)
+                .map(user -> {
+                    user.setActive(false);
+                    userRepository.save(user);
+                    // Cascade: ẩn tất cả playlist của user
+                    playlistRepository.deactivateByUserId(id);
+                    return true;
+                })
+                .orElse(false);
     }
 
     public User findByUsername(String username) {
