@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -79,6 +80,40 @@ public class UserController {
                     response.put("token", newToken);
                     return ResponseEntity.ok(response);
                 })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PatchMapping("/{id}/role")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> updateUserRole(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> body,
+            Authentication authentication) {
+
+        String roleStr = body.get("role");
+        if (roleStr == null || roleStr.isBlank()) {
+            return ResponseEntity.badRequest().body("Role không được để trống.");
+        }
+
+        com.example.musicplayer.entity.Role newRole;
+        try {
+            newRole = com.example.musicplayer.entity.Role.valueOf(roleStr.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body("Role không hợp lệ: " + roleStr);
+        }
+
+        org.springframework.security.core.userdetails.UserDetails principal = (org.springframework.security.core.userdetails.UserDetails) authentication
+                .getPrincipal();
+        com.example.musicplayer.entity.User caller = userService.findByUsername(principal.getUsername());
+        if (caller.getId().equals(id)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Bạn không thể thay đổi role của chính mình.");
+        }
+
+        com.example.musicplayer.entity.Role finalNewRole = newRole;
+        User dummy = new User();
+        dummy.setRole(finalNewRole);
+        return userService.updateUser(id, dummy, true)
+                .map(u -> ResponseEntity.ok((Object) new UserDTO(u)))
                 .orElse(ResponseEntity.notFound().build());
     }
 
