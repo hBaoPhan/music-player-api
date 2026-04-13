@@ -37,10 +37,10 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         boolean wasReactivated = false;
 
         if (user != null) {
-            // Nếu user tồn tại nhưng đã bị vô hiệu hóa, tự động kích hoạt lại
+
             if (!user.isActive()) {
                 userService.reactivateUser(user.getId());
-                user.setActive(true); // cập nhật local object cho đúng
+                user.setActive(true);
                 wasReactivated = true;
             }
             if (user.getProvider() != AuthProvider.GOOGLE) {
