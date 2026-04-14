@@ -29,6 +29,8 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         System.out.println(">>> Xác thực OAuth2 thành công. Đang tạo token ... ");
 
         String token = tokenProvider.generateToken(authentication);
+        String username = authentication.getName();
+        String refreshToken = tokenProvider.generateRefreshTokenFromUsername(username);
 
         boolean wasReactivated = false;
         if (authentication.getPrincipal() instanceof CustomUserDetails principal) {
@@ -37,6 +39,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
         String targetUrl = UriComponentsBuilder.fromUriString(frontendRedirectUrl)
                 .queryParam("token", token)
+                .queryParam("refreshToken", refreshToken)
                 .queryParam("reactivated", wasReactivated)
                 .build().toUriString();
 

@@ -4,11 +4,24 @@ public class JwtResponse {
 
     private String token;
     private String type = "Bearer";
+    private String refreshToken;
     private boolean reactivated;
 
     public JwtResponse(String accessToken) {
         this.token = accessToken;
         this.reactivated = false;
+    }
+
+    public JwtResponse(String accessToken, String refreshToken) {
+        this.token = accessToken;
+        this.refreshToken = refreshToken;
+        this.reactivated = false;
+    }
+
+    public JwtResponse(String accessToken, String refreshToken, boolean reactivated) {
+        this.token = accessToken;
+        this.refreshToken = refreshToken;
+        this.reactivated = reactivated;
     }
 
     public JwtResponse(String accessToken, boolean reactivated) {
@@ -30,6 +43,14 @@ public class JwtResponse {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public String getRefreshToken() {
+        return refreshToken;
+    }
+
+    public void setRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
     }
 
     public boolean isReactivated() {

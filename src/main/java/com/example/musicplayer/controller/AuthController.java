@@ -25,6 +25,7 @@ import com.example.musicplayer.repository.UserRepository;
 import com.example.musicplayer.security.JwtTokenProvider;
 import com.example.musicplayer.service.EmailService;
 import com.example.musicplayer.service.UserService;
+import com.example.musicplayer.dto.RefreshTokenRequest;
 import java.util.Random;
 
 @RestController
@@ -81,7 +82,8 @@ public class AuthController {
         }
 
         String jwt = tokenProvider.generateToken(authentication);
-        return ResponseEntity.ok(new JwtResponse(jwt, wasReactivated));
+        String refreshToken = tokenProvider.generateRefreshTokenFromUsername(resolvedUsername);
+        return ResponseEntity.ok(new JwtResponse(jwt, refreshToken, wasReactivated));
     }
 
     @PostMapping("/register")
@@ -164,5 +166,23 @@ public class AuthController {
         userRepository.save(user);
 
         return ResponseEntity.ok("Đổi mật khẩu thành công!");
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refreshToken(@RequestBody RefreshTokenRequest request) {
+        String requestRefreshToken = request.getRefreshToken();
+
+        if (requestRefreshToken != null && tokenProvider.validateToken(requestRefreshToken)) {
+            String tokenType = tokenProvider.getTokenType(requestRefreshToken);
+            if ("refresh".equals(tokenType)) {
+                String username = tokenProvider.getUsernameFromJwt(requestRefreshToken);
+
+                String newAccessToken = tokenProvider.generateTokenFromUsername(username);
+                String newRefreshToken = tokenProvider.generateRefreshTokenFromUsername(username);
+
+                return ResponseEntity.ok(new JwtResponse(newAccessToken, newRefreshToken, false));
+            }
+        }
+        return ResponseEntity.badRequest().body("Lỗi: Refresh Token không hợp lệ hoặc đã hết hạn!");
     }
 }
