@@ -8,6 +8,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
@@ -40,16 +42,23 @@ public class Album {
     @Column(name = "is_active", nullable = false)
     private boolean isActive = true;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type", nullable = false, columnDefinition = "VARCHAR(255) DEFAULT 'ALBUM'")
+    private AlbumType type = AlbumType.ALBUM;
+
     @OneToMany(mappedBy = "album")
     private List<Song> songs;
 
     public Album() {}
 
-    public Album(String title, Long artistId, String coverUrl, LocalDate releaseDate) {
+    public Album(String title, Long artistId, String coverUrl, LocalDate releaseDate, AlbumType type) {
         this.title = title;
         this.artistId = artistId;
         this.coverUrl = coverUrl;
         this.releaseDate = releaseDate;
+        if (type != null) {
+            this.type = type;
+        }
     }
 
     public Long getId() {
@@ -114,5 +123,13 @@ public class Album {
 
     public void setActive(boolean isActive) {
         this.isActive = isActive;
+    }
+
+    public AlbumType getType() {
+        return type;
+    }
+
+    public void setType(AlbumType type) {
+        this.type = type;
     }
 }

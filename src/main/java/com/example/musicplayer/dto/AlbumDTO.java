@@ -2,6 +2,7 @@ package com.example.musicplayer.dto;
 
 import java.time.LocalDate;
 import com.example.musicplayer.entity.Album;
+import com.example.musicplayer.entity.AlbumType;
 
 public class AlbumDTO {
     private Long id;
@@ -10,6 +11,7 @@ public class AlbumDTO {
     private ArtistDTO artist;
     private String coverUrl;
     private LocalDate releaseDate;
+    private AlbumType type;
 
     public AlbumDTO() {}
 
@@ -20,6 +22,7 @@ public class AlbumDTO {
             this.artistId = album.getArtistId();
             this.coverUrl = album.getCoverUrl();
             this.releaseDate = album.getReleaseDate();
+            this.type = album.getType();
             if (album.getArtist() != null) {
                 this.artist = new ArtistDTO(album.getArtist());
             }
@@ -72,5 +75,13 @@ public class AlbumDTO {
 
     public void setReleaseDate(LocalDate releaseDate) {
         this.releaseDate = releaseDate;
+    }
+
+    public AlbumType getType() {
+        return type;
+    }
+
+    public void setType(AlbumType type) {
+        this.type = type;
     }
 }

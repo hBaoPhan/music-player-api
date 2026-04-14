@@ -54,6 +54,9 @@ public class AlbumService {
                     if (albumDetails.getReleaseDate() != null) {
                         album.setReleaseDate(albumDetails.getReleaseDate());
                     }
+                    if (albumDetails.getType() != null) {
+                        album.setType(albumDetails.getType());
+                    }
                     if (albumDetails.getSongs() != null) {
                         album.setSongs(albumDetails.getSongs());
                     }
