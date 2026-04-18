@@ -1,5 +1,6 @@
 package com.example.musicplayer.controller;
 
+import com.example.musicplayer.repository.UserHistorySongRepository;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
@@ -25,21 +26,30 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import com.example.musicplayer.dto.PlaylistDTO;
 import com.example.musicplayer.dto.SongDTO;
 import com.example.musicplayer.dto.UserDTO;
+import com.example.musicplayer.dto.UserHistorySongDTO;
 import com.example.musicplayer.entity.Song;
 import com.example.musicplayer.entity.User;
+import com.example.musicplayer.entity.UserHistorySong;
 import com.example.musicplayer.service.UserService;
 import com.example.musicplayer.security.JwtTokenProvider;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @RequestMapping("/api/users")
 
 public class UserController {
 
+    private final UserHistorySongRepository userHistorySongRepository;
+
     @Autowired
     private UserService userService;
 
     @Autowired
     private JwtTokenProvider tokenProvider;
+
+    UserController(UserHistorySongRepository userHistorySongRepository) {
+        this.userHistorySongRepository = userHistorySongRepository;
+    }
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
@@ -163,6 +173,32 @@ public class UserController {
         try {
             userService.toggleFavorite(userId, songId);
             return ResponseEntity.ok("Đã cập nhật danh sách yêu thích!");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/{userId}/history")
+    public ResponseEntity<?> getHistorySong(@PathVariable Long userId) {
+        try {
+            List<UserHistorySong> history = userService.getHistorySong(userId);
+            List<UserHistorySongDTO> historyDtos = history.stream()
+                    .map(UserHistorySongDTO::new)
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok(historyDtos);
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PostMapping("/{userId}/history/{songId}")
+    public ResponseEntity<?> addHistorySong(
+            @PathVariable Long userId,
+            @PathVariable Long songId,
+            @RequestParam(defaultValue = "0") Integer duration) {
+        try {
+            userService.addHistorySong(userId, songId, duration);
+            return ResponseEntity.ok("Đã lưu vào lịch sử nghe nhạc!");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

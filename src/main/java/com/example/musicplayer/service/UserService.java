@@ -11,10 +11,12 @@ import jakarta.transaction.Transactional;
 import com.example.musicplayer.entity.Song;
 import com.example.musicplayer.entity.User;
 import com.example.musicplayer.entity.UserFavorite;
+import com.example.musicplayer.entity.UserHistorySong;
 import com.example.musicplayer.repository.PlaylistRepository;
 import com.example.musicplayer.repository.SongRepository;
 
 import com.example.musicplayer.repository.UserFavoriteRepository;
+import com.example.musicplayer.repository.UserHistorySongRepository;
 import com.example.musicplayer.repository.UserRepository;
 import java.time.LocalDateTime;
 import java.util.stream.Collectors;
@@ -33,6 +35,9 @@ public class UserService {
 
     @Autowired
     private UserFavoriteRepository userFavoriteRepository;
+
+    @Autowired
+    private UserHistorySongRepository userHistorySongRepository;
 
     public List<User> getAllUsers() {
         return userRepository.findAllByIsActiveTrue();
@@ -118,5 +123,21 @@ public class UserService {
         return userFavoriteRepository.findByUserId(userId).stream()
                 .map(UserFavorite::getSong)
                 .collect(Collectors.toList());
+    }
+
+    public List<UserHistorySong> getHistorySong(Long userId) {
+        return userHistorySongRepository.findByUserIdAndDurationListenedGreaterThanOrderByListenedAtDesc(userId, 10);
+    }
+
+    @Transactional
+    public void addHistorySong(Long userId, Long songId, Integer duration) {
+        if (!userRepository.existsById(userId)) {
+            throw new RuntimeException("Không tìm thấy User");
+        }
+        if (!songRepository.existsById(songId)) {
+            throw new RuntimeException("Không tìm thấy Bài hát");
+        }
+        UserHistorySong history = new UserHistorySong(userId, songId, LocalDateTime.now(), duration);
+        userHistorySongRepository.save(history);
     }
 }
