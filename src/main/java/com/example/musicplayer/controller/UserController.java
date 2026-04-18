@@ -39,17 +39,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 public class UserController {
 
-    private final UserHistorySongRepository userHistorySongRepository;
-
     @Autowired
     private UserService userService;
 
     @Autowired
     private JwtTokenProvider tokenProvider;
-
-    UserController(UserHistorySongRepository userHistorySongRepository) {
-        this.userHistorySongRepository = userHistorySongRepository;
-    }
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
@@ -201,6 +195,19 @@ public class UserController {
             return ResponseEntity.ok("Đã lưu vào lịch sử nghe nhạc!");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/{userId}/history/top-this-month")
+    public ResponseEntity<List<SongDTO>> getTopSongsThisMonth(@PathVariable Long userId) {
+        try {
+            List<Song> songs = userService.getTopSongsThisMonth(userId);
+            List<SongDTO> songDtos = songs.stream()
+                    .map(SongDTO::new)
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok(songDtos);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 }

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import jakarta.transaction.Transactional;
@@ -127,6 +128,16 @@ public class UserService {
 
     public List<UserHistorySong> getHistorySong(Long userId) {
         return userHistorySongRepository.findByUserIdAndDurationListenedGreaterThanOrderByListenedAtDesc(userId, 10);
+    }
+
+    public List<Song> getTopSongsThisMonth(Long userId) {
+        LocalDateTime startOfMonth = LocalDateTime.now()
+                .withDayOfMonth(1)
+                .withHour(0)
+                .withMinute(0)
+                .withSecond(0)
+                .withNano(0);
+        return userHistorySongRepository.findTopSongsThisMonth(userId, startOfMonth, PageRequest.of(0, 10));
     }
 
     @Transactional
