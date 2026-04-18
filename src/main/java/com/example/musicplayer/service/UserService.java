@@ -1,7 +1,9 @@
 package com.example.musicplayer.service;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -127,7 +129,10 @@ public class UserService {
     }
 
     public List<UserHistorySong> getHistorySong(Long userId) {
-        return userHistorySongRepository.findByUserIdAndDurationListenedGreaterThanOrderByListenedAtDesc(userId, 10);
+        Set<Long> seenSongIds = new HashSet<>();
+        return userHistorySongRepository.findByUserIdOrderByListenedAtDesc(userId).stream()
+                .filter(history -> seenSongIds.add(history.getSongId()))
+                .collect(Collectors.toList());
     }
 
     public List<Song> getTopSongsThisMonth(Long userId) {
@@ -141,7 +146,8 @@ public class UserService {
     }
 
     @Transactional
-    public void addHistorySong(Long userId, Long songId, Integer duration) {
+    public void addHistorySong(Long userId, Long songId, Integer duration) { //// sau này sẽ phát triển history dựa trên
+                                                                             //// duration
         if (!userRepository.existsById(userId)) {
             throw new RuntimeException("Không tìm thấy User");
         }
