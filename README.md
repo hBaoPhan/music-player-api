@@ -1,1 +1,2 @@
-API for spotifour music player
+API for spotifour music player 
+https://github.com/hBaoPhan/music-player-client
