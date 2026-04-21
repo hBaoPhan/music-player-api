@@ -21,7 +21,7 @@ public class ArtistService {
     private SongRepository songRepository;
     
     public List<Artist> getAllArtists() {
-        return artistRepository.findAllByIsActiveTrue();
+        return artistRepository.findAllByActiveTrue();
     }
     
     public Optional<Artist> getArtistById(Long id) {

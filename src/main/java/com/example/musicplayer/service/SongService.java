@@ -16,7 +16,7 @@ public class SongService {
     private SongRepository songRepository;
     
     public List<Song> getAllSongs() {
-        return songRepository.findAllByIsActiveTrue();
+        return songRepository.findAllByActiveTrue();
     }
     
     public Optional<Song> getSongById(Long id) {
@@ -52,14 +52,14 @@ public class SongService {
     }
     
     public List<Song> getSongsByArtist(Long artistId) {
-        return songRepository.findByArtistIdAndIsActiveTrue(artistId);
+        return songRepository.findByArtistIdAndActiveTrue(artistId);
     }
 
     public List<Song> getSongsByAlbum(Long albumId) {
-        return songRepository.findByAlbumIdAndIsActiveTrue(albumId);
+        return songRepository.findByAlbumIdAndActiveTrue(albumId);
     }
 
     public List<Song> getSongsByTitle(String title) {
-        return songRepository.findByTitleAndIsActiveTrue(title);
+        return songRepository.findByTitleAndActiveTrue(title);
     }
 }

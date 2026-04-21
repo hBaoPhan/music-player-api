@@ -8,7 +8,7 @@ import com.example.musicplayer.entity.Album;
 
 public interface AlbumRepository extends JpaRepository<Album, Long> {
     // Soft delete queries
-    List<Album> findAllByIsActiveTrue();
+    List<Album> findAllByActiveTrue();
 
-    List<Album> findByArtistIdAndIsActiveTrue(Long artistId);
+    List<Album> findByArtistIdAndActiveTrue(Long artistId);
 }

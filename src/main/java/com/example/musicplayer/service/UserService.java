@@ -43,11 +43,11 @@ public class UserService {
     private UserHistorySongRepository userHistorySongRepository;
 
     public List<User> getAllUsers() {
-        return userRepository.findAllByIsActiveTrue();
+        return userRepository.findAllByActiveTrue();
     }
 
     public Optional<User> getUserById(Long id) {
-        return userRepository.findByIdAndIsActiveTrue(id);
+        return userRepository.findByIdAndActiveTrue(id);
     }
 
     public User createUser(User user) {

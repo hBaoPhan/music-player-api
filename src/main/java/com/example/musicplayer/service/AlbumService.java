@@ -21,7 +21,7 @@ public class AlbumService {
     private SongRepository songRepository;
 
     public List<Album> getAllAlbums() {
-        return albumRepository.findAllByIsActiveTrue();
+        return albumRepository.findAllByActiveTrue();
     }
 
     public Optional<Album> getAlbumById(Long id) {
@@ -78,6 +78,6 @@ public class AlbumService {
     }
 
     public List<Album> getAlbumsByArtist(Long artistId) {
-        return albumRepository.findByArtistIdAndIsActiveTrue(artistId);
+        return albumRepository.findByArtistIdAndActiveTrue(artistId);
     }
 }

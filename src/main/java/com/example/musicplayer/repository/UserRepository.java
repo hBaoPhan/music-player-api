@@ -15,15 +15,15 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByUsernameOrEmail(String username, String email);
 
     // Auth: chỉ tìm user đang active
-    Optional<User> findByUsernameOrEmailAndIsActiveTrue(String username, String email);
+    Optional<User> findByUsernameOrEmailAndActiveTrue(String username, String email);
 
     boolean existsByUsername(String username);
 
     boolean existsByEmail(String email);
 
-    List<User> findAllByIsActiveTrue();
+    List<User> findAllByActiveTrue();
 
-    Optional<User> findByIdAndIsActiveTrue(Long id);
+    Optional<User> findByIdAndActiveTrue(Long id);
 
-    boolean existsByIdAndIsActiveTrue(Long id);
+    boolean existsByIdAndActiveTrue(Long id);
 }

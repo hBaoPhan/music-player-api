@@ -10,5 +10,5 @@ public interface ArtistRepository extends JpaRepository<Artist, Long> {
     Artist findByName(String name);
 
     // Soft delete queries
-    List<Artist> findAllByIsActiveTrue();
+    List<Artist> findAllByActiveTrue();
 }

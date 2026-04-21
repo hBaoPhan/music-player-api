@@ -80,7 +80,7 @@ public class PlaylistService {
     }
 
     public List<Playlist> getPlaylistsByUser(Long userId) {
-        return playlistRepository.findByUserIdAndIsActiveTrue(userId);
+        return playlistRepository.findByUserIdAndActiveTrue(userId);
     }
 
     @Transactional

@@ -10,13 +10,13 @@ import org.springframework.data.repository.query.Param;
 import com.example.musicplayer.entity.Playlist;
 
 public interface PlaylistRepository extends JpaRepository<Playlist, Long> {
-    List<Playlist> findByUserIdAndIsActiveTrue(Long userId);
+    List<Playlist> findByUserIdAndActiveTrue(Long userId);
 
     @Modifying
-    @Query("UPDATE Playlist p SET p.isActive = false WHERE p.userId = :userId AND p.isActive = true")
+    @Query("UPDATE Playlist p SET p.active = false WHERE p.userId = :userId AND p.active = true")
     void deactivateByUserId(@Param("userId") Long userId);
 
     @Modifying
-    @Query("UPDATE Playlist p SET p.isActive = true WHERE p.userId = :userId AND p.isActive = false")
+    @Query("UPDATE Playlist p SET p.active = true WHERE p.userId = :userId AND p.active = false")
     void reactivateByUserId(@Param("userId") Long userId);
 }
