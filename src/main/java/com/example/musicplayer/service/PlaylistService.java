@@ -5,8 +5,11 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import com.example.musicplayer.dto.PlaylistRequestDTO;
+import com.example.musicplayer.entity.CustomUserDetails;
 import com.example.musicplayer.entity.Playlist;
 import com.example.musicplayer.entity.PlaylistSong;
 import com.example.musicplayer.repository.PlaylistRepository;
@@ -36,19 +39,21 @@ public class PlaylistService {
         return playlistRepository.findById(id);
     }
 
-    public Playlist createPlaylist(Playlist playlist) {
+    public Playlist createPlaylist(PlaylistRequestDTO dto) {
+        // Lấy userId từ SecurityContext — không tin tưởng client
+        CustomUserDetails principal = (CustomUserDetails) SecurityContextHolder
+                .getContext().getAuthentication().getPrincipal();
+        Long userId = principal.getUser().getId();
+
+        Playlist playlist = new Playlist(dto.getName(), userId, LocalDateTime.now());
         return playlistRepository.save(playlist);
     }
 
-    public Optional<Playlist> updatePlaylist(Long id, Playlist playlistDetails) {
+    public Optional<Playlist> updatePlaylist(Long id, PlaylistRequestDTO dto) {
         return playlistRepository.findById(id)
                 .map(playlist -> {
-                    playlist.setName(playlistDetails.getName());
-                    playlist.setUser(playlistDetails.getUser());
-                    if (playlistDetails.getUser() != null) {
-                        playlist.setUserId(playlistDetails.getUser().getId());
-                    }
-                    playlist.setCreatedAt(playlistDetails.getCreatedAt());
+                    // Chỉ cho phép cập nhật name — không thể thay đổi userId hay createdAt
+                    playlist.setName(dto.getName());
                     return playlistRepository.save(playlist);
                 });
     }

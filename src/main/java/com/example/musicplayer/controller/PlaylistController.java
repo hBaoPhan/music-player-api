@@ -18,10 +18,13 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 import com.example.musicplayer.dto.PlaylistDTO;
+import com.example.musicplayer.dto.PlaylistRequestDTO;
 import com.example.musicplayer.dto.SongDTO;
 import com.example.musicplayer.entity.Playlist;
 import com.example.musicplayer.service.PlaylistService;
 import com.example.musicplayer.service.PlaylistSongService;
+
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/playlists")
@@ -35,6 +38,7 @@ public class PlaylistController {
     private PlaylistSongService playlistSongService;
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public List<PlaylistDTO> getAllPlaylists() {
         return playlistService.getAllPlaylists().stream()
                 .map(PlaylistDTO::new)
@@ -50,15 +54,15 @@ public class PlaylistController {
     }
 
     @PostMapping
-    public ResponseEntity<PlaylistDTO> createPlaylist(@RequestBody Playlist playlist) {
-        Playlist savedPlaylist = playlistService.createPlaylist(playlist);
+    public ResponseEntity<PlaylistDTO> createPlaylist(@Valid @RequestBody PlaylistRequestDTO dto) {
+        Playlist savedPlaylist = playlistService.createPlaylist(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(new PlaylistDTO(savedPlaylist));
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or @playlistService.isOwner(#id, principal.user.id)")
-    public ResponseEntity<PlaylistDTO> updatePlaylist(@PathVariable Long id, @RequestBody Playlist playlistDetails) {
-        return playlistService.updatePlaylist(id, playlistDetails)
+    public ResponseEntity<PlaylistDTO> updatePlaylist(@PathVariable Long id, @Valid @RequestBody PlaylistRequestDTO dto) {
+        return playlistService.updatePlaylist(id, dto)
                 .map(PlaylistDTO::new)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
