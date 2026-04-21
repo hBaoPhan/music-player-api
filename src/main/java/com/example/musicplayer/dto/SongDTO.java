@@ -1,10 +1,16 @@
 package com.example.musicplayer.dto;
 
-import com.example.musicplayer.entity.Song;
-
 import com.example.musicplayer.entity.Genre;
+import com.example.musicplayer.entity.Song;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+@Getter
+@Setter
+@NoArgsConstructor
 public class SongDTO {
+
     private Long id;
     private String title;
     private String audioUrl;
@@ -13,8 +19,6 @@ public class SongDTO {
     private Genre genre;
     private ArtistDTO artist;
     private AlbumDTO album;
-
-    public SongDTO() {}
 
     public SongDTO(Song song) {
         if (song != null) {
@@ -31,69 +35,5 @@ public class SongDTO {
                 this.album = new AlbumDTO(song.getAlbum());
             }
         }
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getAudioUrl() {
-        return audioUrl;
-    }
-
-    public void setAudioUrl(String audioUrl) {
-        this.audioUrl = audioUrl;
-    }
-
-    public Integer getDuration() {
-        return duration;
-    }
-
-    public void setDuration(Integer duration) {
-        this.duration = duration;
-    }
-
-    public Integer getPlayCount() {
-        return playCount;
-    }
-
-    public void setPlayCount(Integer playCount) {
-        this.playCount = playCount;
-    }
-
-    public ArtistDTO getArtist() {
-        return artist;
-    }
-
-    public void setArtist(ArtistDTO artist) {
-        this.artist = artist;
-    }
-
-    public AlbumDTO getAlbum() {
-        return album;
-    }
-
-    public void setAlbum(AlbumDTO album) {
-        this.album = album;
-    }
-
-    public Genre getGenre() {
-        return genre;
-    }
-
-    public void setGenre(Genre genre) {
-        this.genre = genre;
     }
 }

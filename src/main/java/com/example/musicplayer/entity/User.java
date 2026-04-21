@@ -2,6 +2,7 @@ package com.example.musicplayer.entity;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -12,10 +13,15 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
 import jakarta.persistence.PrePersist;
-import java.util.stream.Collectors;
+import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+@Getter
+@Setter
+@NoArgsConstructor
 @Entity
 @Table(name = "users")
 public class User {
@@ -42,7 +48,7 @@ public class User {
     private AuthProvider provider = AuthProvider.LOCAL;
 
     @Column(name = "is_active", nullable = false)
-    private boolean isActive = true;
+    private boolean active = true;
 
     @OneToMany(mappedBy = "user")
     private List<Playlist> playlists;
@@ -50,28 +56,9 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserFavorite> favorites = new ArrayList<>();
 
-    public User() {
-    }
-
     @PrePersist
     protected void onCreate() {
-        this.isActive = true;
-    }
-
-    public boolean isActive() {
-        return isActive;
-    }
-
-    public void setActive(boolean isActive) {
-        this.isActive = isActive;
-    }
-
-    public List<UserFavorite> getFavorites() {
-        return favorites;
-    }
-
-    public void setFavorites(List<UserFavorite> favorites) {
-        this.favorites = favorites;
+        this.active = true;
     }
 
     public List<Song> getFavoriteSongs() {
@@ -80,63 +67,7 @@ public class User {
                 .collect(Collectors.toList());
     }
 
+    // Compatibility method — không set trực tiếp, dùng UserFavorite
     public void setFavoriteSongs(List<Song> favoriteSongs) {
-        // Compatibility method
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public AuthProvider getProvider() {
-        return provider;
-    }
-
-    public void setProvider(AuthProvider provider) {
-        this.provider = provider;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public Role getRole() {
-        return role;
-    }
-
-    public void setRole(Role role) {
-        this.role = role;
-    }
-
-    public List<Playlist> getPlaylists() {
-        return playlists;
-    }
-
-    public void setPlaylists(List<Playlist> playlists) {
-        this.playlists = playlists;
     }
 }

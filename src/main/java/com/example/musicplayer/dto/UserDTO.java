@@ -6,8 +6,15 @@ import java.util.stream.Collectors;
 import com.example.musicplayer.entity.AuthProvider;
 import com.example.musicplayer.entity.Role;
 import com.example.musicplayer.entity.User;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+@Getter
+@Setter
+@NoArgsConstructor
 public class UserDTO {
+
     private Long id;
     private String username;
     private String email;
@@ -15,8 +22,6 @@ public class UserDTO {
     private AuthProvider provider;
     private List<PlaylistDTO> playlists;
     private List<SongDTO> favoriteSongs;
-
-    public UserDTO() {}
 
     public UserDTO(User user) {
         if (user != null) {
@@ -36,61 +41,5 @@ public class UserDTO {
                         .collect(Collectors.toList());
             }
         }
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public Role getRole() {
-        return role;
-    }
-
-    public void setRole(Role role) {
-        this.role = role;
-    }
-
-    public AuthProvider getProvider() {
-        return provider;
-    }
-
-    public void setProvider(AuthProvider provider) {
-        this.provider = provider;
-    }
-
-    public List<PlaylistDTO> getPlaylists() {
-        return playlists;
-    }
-
-    public void setPlaylists(List<PlaylistDTO> playlists) {
-        this.playlists = playlists;
-    }
-
-    public List<SongDTO> getFavoriteSongs() {
-        return favoriteSongs;
-    }
-
-    public void setFavoriteSongs(List<SongDTO> favoriteSongs) {
-        this.favoriteSongs = favoriteSongs;
     }
 }

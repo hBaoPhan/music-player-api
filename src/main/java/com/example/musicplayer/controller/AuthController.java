@@ -1,5 +1,6 @@
 package com.example.musicplayer.controller;
 
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -8,29 +9,28 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.musicplayer.dto.ChangePasswordRequest;
+import com.example.musicplayer.dto.ForgotPasswordRequest;
 import com.example.musicplayer.dto.JwtResponse;
 import com.example.musicplayer.dto.LoginRequest;
+import com.example.musicplayer.dto.RefreshTokenRequest;
 import com.example.musicplayer.dto.RegisterRequest;
-import com.example.musicplayer.dto.ForgotPasswordRequest;
-import com.example.musicplayer.dto.ChangePasswordRequest;
 import com.example.musicplayer.entity.Role;
 import com.example.musicplayer.entity.User;
 import com.example.musicplayer.repository.UserRepository;
 import com.example.musicplayer.security.JwtTokenProvider;
 import com.example.musicplayer.service.EmailService;
 import com.example.musicplayer.service.UserService;
-import com.example.musicplayer.dto.RefreshTokenRequest;
+
 import java.util.Random;
 
 @RestController
 @RequestMapping("/api/auth")
-
 public class AuthController {
 
     @Autowired
@@ -52,12 +52,12 @@ public class AuthController {
     private UserService userService;
 
     @PostMapping("/login")
-    public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest) throws Exception {
+    public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) throws Exception {
 
         String usernameOrEmail = loginRequest.getUsername();
         String resolvedUsername = usernameOrEmail;
 
-        if (usernameOrEmail != null && usernameOrEmail.contains("@")) {
+        if (usernameOrEmail.contains("@")) {
             User user = userRepository.findByEmail(usernameOrEmail);
             if (user == null) {
                 return ResponseEntity.badRequest().body("Lỗi: Không tìm thấy tài khoản với email này!");
@@ -87,12 +87,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@RequestBody RegisterRequest signUpRequest) {
-        if (signUpRequest.getUsername() == null || signUpRequest.getUsername().trim().isEmpty() ||
-                signUpRequest.getPassword() == null || signUpRequest.getPassword().trim().isEmpty() ||
-                signUpRequest.getEmail() == null || signUpRequest.getEmail().trim().isEmpty()) {
-            return ResponseEntity.badRequest().body("Lỗi: Không được để trống thông tin đăng ký!");
-        }
+    public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterRequest signUpRequest) {
 
         if (userRepository.existsByUsername(signUpRequest.getUsername())) {
             return ResponseEntity.badRequest().body("Lỗi: Username đã tồn tại!");
@@ -105,9 +100,7 @@ public class AuthController {
         User user = new User();
         user.setUsername(signUpRequest.getUsername());
         user.setEmail(signUpRequest.getEmail());
-
         user.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
-
         user.setRole(Role.USER);
 
         userRepository.save(user);
@@ -116,10 +109,7 @@ public class AuthController {
     }
 
     @PostMapping("/forgot-password")
-    public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordRequest request) {
-        if (request.getEmail() == null || request.getEmail().trim().isEmpty()) {
-            return ResponseEntity.badRequest().body("Lỗi: Email không được để trống!");
-        }
+    public ResponseEntity<?> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
 
         User user = userRepository.findByEmail(request.getEmail());
         if (user == null) {
@@ -147,10 +137,7 @@ public class AuthController {
     }
 
     @PostMapping("/change-password")
-    public ResponseEntity<?> changePassword(@RequestBody ChangePasswordRequest request) {
-        if (request.getUsername() == null || request.getOldPassword() == null || request.getNewPassword() == null) {
-            return ResponseEntity.badRequest().body("Lỗi: Thiếu thông tin đổi mật khẩu!");
-        }
+    public ResponseEntity<?> changePassword(@Valid @RequestBody ChangePasswordRequest request) {
 
         User user = userRepository.findByUsername(request.getUsername()).orElse(null);
 

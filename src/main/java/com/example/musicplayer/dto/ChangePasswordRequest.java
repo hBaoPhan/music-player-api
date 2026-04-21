@@ -1,39 +1,23 @@
 package com.example.musicplayer.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class ChangePasswordRequest {
+
+    @NotBlank(message = "Username không được để trống")
     private String username;
+
+    @NotBlank(message = "Mật khẩu cũ không được để trống")
     private String oldPassword;
+
+    @NotBlank(message = "Mật khẩu mới không được để trống")
+    @Size(min = 6, message = "Mật khẩu mới phải có ít nhất 6 ký tự")
     private String newPassword;
-
-    public ChangePasswordRequest() {}
-
-    public ChangePasswordRequest(String username, String oldPassword, String newPassword) {
-        this.username = username;
-        this.oldPassword = oldPassword;
-        this.newPassword = newPassword;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getOldPassword() {
-        return oldPassword;
-    }
-
-    public void setOldPassword(String oldPassword) {
-        this.oldPassword = oldPassword;
-    }
-
-    public String getNewPassword() {
-        return newPassword;
-    }
-
-    public void setNewPassword(String newPassword) {
-        this.newPassword = newPassword;
-    }
 }
