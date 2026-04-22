@@ -40,32 +40,32 @@ public class PlaylistController {
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
     public List<PlaylistDTO> getAllPlaylists() {
-        return playlistService.getAllPlaylists().stream()
-                .map(PlaylistDTO::new)
-                .collect(Collectors.toList());
+        return playlistService.getAllPlaylists();
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<PlaylistDTO> getPlaylistById(@PathVariable Long id) {
-        return playlistService.getPlaylistById(id)
-                .map(PlaylistDTO::new)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        PlaylistDTO playlist = playlistService.getPlaylistById(id);
+        if (playlist != null) {
+            return ResponseEntity.ok(playlist);
+        }
+        return ResponseEntity.notFound().build();
     }
 
     @PostMapping
     public ResponseEntity<PlaylistDTO> createPlaylist(@Valid @RequestBody PlaylistRequestDTO dto) {
-        Playlist savedPlaylist = playlistService.createPlaylist(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(new PlaylistDTO(savedPlaylist));
+        PlaylistDTO savedPlaylist = playlistService.createPlaylist(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedPlaylist);
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or @playlistService.isOwner(#id, principal.user.id)")
     public ResponseEntity<PlaylistDTO> updatePlaylist(@PathVariable Long id, @Valid @RequestBody PlaylistRequestDTO dto) {
-        return playlistService.updatePlaylist(id, dto)
-                .map(PlaylistDTO::new)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        PlaylistDTO updatedPlaylist = playlistService.updatePlaylist(id, dto);
+        if (updatedPlaylist != null) {
+            return ResponseEntity.ok(updatedPlaylist);
+        }
+        return ResponseEntity.notFound().build();
     }
 
     @DeleteMapping("/{id}")
@@ -79,26 +79,23 @@ public class PlaylistController {
 
     @GetMapping("/user/{userId}")
     public List<PlaylistDTO> getPlaylistsByUser(@PathVariable Long userId) {
-        return playlistService.getPlaylistsByUser(userId).stream()
-                .map(PlaylistDTO::new)
-                .collect(Collectors.toList());
+        return playlistService.getPlaylistsByUser(userId);
     }
 
     @GetMapping("/{id}/songs")
     public ResponseEntity<List<SongDTO>> getPlaylistSongs(@PathVariable Long id) {
-        return playlistService.getPlaylistById(id)
-                .map(playlist -> ResponseEntity.ok(
-                        playlist.getSongs().stream()
-                                .map(SongDTO::new)
-                                .collect(Collectors.toList())))
-                .orElse(ResponseEntity.notFound().build());
+        PlaylistDTO playlist = playlistService.getPlaylistById(id);
+        if (playlist != null) {
+            return ResponseEntity.ok(playlist.getSongs());
+        }
+        return ResponseEntity.notFound().build();
     }
 
     @PostMapping("/{playlistId}/songs/{songId}")
     @PreAuthorize("hasRole('ADMIN') or @playlistService.isOwner(#playlistId, principal.user.id)")
     public ResponseEntity<PlaylistDTO> addSong(@PathVariable Long playlistId, @PathVariable Long songId) {
-        Playlist updatedPlaylist = playlistService.addSongToPlaylist(playlistId, songId);
-        return ResponseEntity.ok(new PlaylistDTO(updatedPlaylist));
+        PlaylistDTO updatedPlaylist = playlistService.addSongToPlaylist(playlistId, songId);
+        return ResponseEntity.ok(updatedPlaylist);
     }
 
     @DeleteMapping("/{playlistId}/songs/{songId}")

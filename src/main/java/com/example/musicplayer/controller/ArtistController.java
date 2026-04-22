@@ -21,7 +21,9 @@ import com.example.musicplayer.dto.AlbumDTO;
 import com.example.musicplayer.dto.ArtistDTO;
 import com.example.musicplayer.dto.SongDTO;
 import com.example.musicplayer.entity.Artist;
+import com.example.musicplayer.service.AlbumService;
 import com.example.musicplayer.service.ArtistService;
+import com.example.musicplayer.service.SongService;
 
 @RestController
 @RequestMapping("/api/artists")
@@ -31,35 +33,41 @@ public class ArtistController {
     @Autowired
     private ArtistService artistService;
 
+    @Autowired
+    private AlbumService albumService;
+
+    @Autowired
+    private SongService songService;
+
     @GetMapping
     public List<ArtistDTO> getAllArtists() {
-        return artistService.getAllArtists().stream()
-                .map(ArtistDTO::new)
-                .collect(Collectors.toList());
+        return artistService.getAllArtists();
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ArtistDTO> getArtistById(@PathVariable Long id) {
-        return artistService.getArtistById(id)
-                .map(ArtistDTO::new)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        ArtistDTO artist = artistService.getArtistById(id);
+        if (artist != null) {
+            return ResponseEntity.ok(artist);
+        }
+        return ResponseEntity.notFound().build();
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<ArtistDTO> createArtist(@RequestBody Artist artist) {
-        Artist savedArtist = artistService.createArtist(artist);
-        return ResponseEntity.status(HttpStatus.CREATED).body(new ArtistDTO(savedArtist));
+        ArtistDTO savedArtist = artistService.createArtist(artist);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedArtist);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<ArtistDTO> updateArtist(@PathVariable Long id, @RequestBody Artist artistDetails) {
-        return artistService.updateArtist(id, artistDetails)
-                .map(ArtistDTO::new)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        ArtistDTO updatedArtist = artistService.updateArtist(id, artistDetails);
+        if (updatedArtist != null) {
+            return ResponseEntity.ok(updatedArtist);
+        }
+        return ResponseEntity.notFound().build();
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -73,30 +81,20 @@ public class ArtistController {
 
     @GetMapping("/name/{name}")
     public ResponseEntity<ArtistDTO> getArtistByName(@PathVariable String name) {
-        Artist artist = artistService.findByName(name);
+        ArtistDTO artist = artistService.findByName(name);
         if (artist != null) {
-            return ResponseEntity.ok(new ArtistDTO(artist));
+            return ResponseEntity.ok(artist);
         }
         return ResponseEntity.notFound().build();
     }
 
     @GetMapping("/{id}/albums")
     public ResponseEntity<List<AlbumDTO>> getArtistAlbums(@PathVariable Long id) {
-        return artistService.getArtistById(id)
-                .map(artist -> ResponseEntity.ok(
-                        artist.getAlbums().stream()
-                                .map(AlbumDTO::new)
-                                .collect(Collectors.toList())))
-                .orElse(ResponseEntity.notFound().build());
+        return ResponseEntity.ok(albumService.getAlbumsByArtist(id));
     }
 
     @GetMapping("/{id}/songs")
     public ResponseEntity<List<SongDTO>> getArtistSongs(@PathVariable Long id) {
-        return artistService.getArtistById(id)
-                .map(artist -> ResponseEntity.ok(
-                        artist.getSongs().stream()
-                                .map(SongDTO::new)
-                                .collect(Collectors.toList())))
-                .orElse(ResponseEntity.notFound().build());
+        return ResponseEntity.ok(songService.getSongsByArtist(id));
     }
 }

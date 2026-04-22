@@ -29,6 +29,7 @@ import com.example.musicplayer.dto.UserHistorySongDTO;
 import com.example.musicplayer.entity.Song;
 import com.example.musicplayer.entity.User;
 import com.example.musicplayer.entity.UserHistorySong;
+import com.example.musicplayer.service.PlaylistService;
 import com.example.musicplayer.service.UserService;
 import com.example.musicplayer.security.JwtTokenProvider;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -42,6 +43,9 @@ public class UserController {
     private UserService userService;
 
     @Autowired
+    private PlaylistService playlistService;
+
+    @Autowired
     private JwtTokenProvider tokenProvider;
 
     @GetMapping
@@ -53,7 +57,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or #id == principal.user.id")
+    @PreAuthorize("hasRole('ADMIN') or @userService.isOwner(#id, principal)")
     public ResponseEntity<UserDTO> getUserById(@PathVariable Long id) {
         return userService.getUserById(id)
                 .map(UserDTO::new)
@@ -69,7 +73,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or #id == principal.user.id")
+    @PreAuthorize("hasRole('ADMIN') or @userService.isOwner(#id, principal)")
     public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody User userDetails,
             Authentication authentication) {
         boolean isAdmin = authentication.getAuthorities()
@@ -131,12 +135,8 @@ public class UserController {
 
     @GetMapping("/{id}/playlists")
     public ResponseEntity<List<PlaylistDTO>> getUserPlaylists(@PathVariable Long id) {
-        return userService.getUserById(id)
-                .map(user -> ResponseEntity.ok(
-                        user.getPlaylists().stream()
-                                .map(PlaylistDTO::new)
-                                .collect(Collectors.toList())))
-                .orElse(ResponseEntity.notFound().build());
+        List<PlaylistDTO> userPlaylists = playlistService.getPlaylistsByUser(id);
+        return ResponseEntity.ok(userPlaylists);
     }
 
     @GetMapping("/username/{username}")
@@ -149,6 +149,7 @@ public class UserController {
     }
 
     @GetMapping("/{userId}/favorites")
+    @PreAuthorize("hasRole('ADMIN') or @userService.isOwner(#userId, principal)")
     public ResponseEntity<List<SongDTO>> getFavoriteSongs(@PathVariable Long userId) {
         try {
             List<Song> favorites = userService.getFavoriteSongs(userId);
@@ -162,6 +163,7 @@ public class UserController {
     }
 
     @PostMapping("/{userId}/favorites/{songId}")
+    @PreAuthorize("hasRole('ADMIN') or @userService.isOwner(#userId, principal)")
     public ResponseEntity<?> toggleFavorite(@PathVariable Long userId, @PathVariable Long songId) {
         try {
             userService.toggleFavorite(userId, songId);
@@ -172,6 +174,7 @@ public class UserController {
     }
 
     @GetMapping("/{userId}/history")
+    @PreAuthorize("hasRole('ADMIN') or @userService.isOwner(#userId, principal)")
     public ResponseEntity<?> getHistorySong(@PathVariable Long userId) {
         try {
             List<UserHistorySong> history = userService.getHistorySong(userId);
@@ -185,6 +188,7 @@ public class UserController {
     }
 
     @PostMapping("/{userId}/history/{songId}")
+    @PreAuthorize("hasRole('ADMIN') or @userService.isOwner(#userId, principal)")
     public ResponseEntity<?> addHistorySong(
             @PathVariable Long userId,
             @PathVariable Long songId,
@@ -198,6 +202,7 @@ public class UserController {
     }
 
     @GetMapping("/{userId}/history/top-this-month")
+    @PreAuthorize("hasRole('ADMIN') or @userService.isOwner(#userId, principal)")
     public ResponseEntity<List<SongDTO>> getTopSongsThisMonth(@PathVariable Long userId) {
         try {
             List<Song> songs = userService.getTopSongsThisMonth(userId);

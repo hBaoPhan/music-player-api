@@ -1,13 +1,17 @@
 package com.example.musicplayer.service;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import jakarta.transaction.Transactional;
 
 import com.example.musicplayer.entity.Artist;
+import com.example.musicplayer.dto.ArtistDTO;
 import com.example.musicplayer.repository.ArtistRepository;
 import com.example.musicplayer.repository.SongRepository;
 
@@ -20,19 +24,26 @@ public class ArtistService {
     @Autowired
     private SongRepository songRepository;
     
-    public List<Artist> getAllArtists() {
-        return artistRepository.findAllByActiveTrue();
+    @Cacheable(value = "artistsList")
+    public List<ArtistDTO> getAllArtists() {
+        return artistRepository.findAllByActiveTrue().stream()
+                .map(ArtistDTO::new)
+                .collect(Collectors.toList());
     }
     
-    public Optional<Artist> getArtistById(Long id) {
-        return artistRepository.findById(id);
+    @Cacheable(value = "artist", key = "#id", unless = "#result == null")
+    public ArtistDTO getArtistById(Long id) {
+        return artistRepository.findById(id).map(ArtistDTO::new).orElse(null);
     }
     
-    public Artist createArtist(Artist artist) {
-        return artistRepository.save(artist);
+    @CacheEvict(value = "artistsList", allEntries = true)
+    public ArtistDTO createArtist(Artist artist) {
+        return new ArtistDTO(artistRepository.save(artist));
     }
     
-    public Optional<Artist> updateArtist(Long id, Artist artistDetails) {
+    @CacheEvict(value = "artistsList", allEntries = true)
+    @CachePut(value = "artist", key = "#id", unless = "#result == null")
+    public ArtistDTO updateArtist(Long id, Artist artistDetails) {
         return artistRepository.findById(id)
                 .map(artist -> {
                     artist.setName(artistDetails.getName());
@@ -44,11 +55,13 @@ public class ArtistService {
                     if (artistDetails.getSongs() != null) {
                         artist.setSongs(artistDetails.getSongs());
                     }
-                    return artistRepository.save(artist);
-                });
+                    return new ArtistDTO(artistRepository.save(artist));
+                })
+                .orElse(null);
     }
     
     @Transactional
+    @CacheEvict(value = {"artist", "artistsList"}, allEntries = true)
     public boolean deleteArtist(Long id) {
         return artistRepository.findById(id)
                 .map(artist -> {
@@ -61,7 +74,8 @@ public class ArtistService {
                 .orElse(false);
     }
     
-    public Artist findByName(String name) {
-        return artistRepository.findByName(name);
+    public ArtistDTO findByName(String name) {
+        Artist artist = artistRepository.findByName(name);
+        return artist != null ? new ArtistDTO(artist) : null;
     }
 }

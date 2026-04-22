@@ -2,12 +2,16 @@ package com.example.musicplayer.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import com.example.musicplayer.dto.PlaylistDTO;
 import com.example.musicplayer.dto.PlaylistRequestDTO;
 import com.example.musicplayer.entity.CustomUserDetails;
 import com.example.musicplayer.entity.Playlist;
@@ -30,35 +34,41 @@ public class PlaylistService {
     @Autowired
     private PlaylistSongRepository playlistSongRepository;
 
-    public List<Playlist> getAllPlaylists() {
-        // Trả về tất cả playlist active — dùng nội bộ (admin)
-        return playlistRepository.findAll();
+    @Cacheable(value = "playlistsList")
+    public List<PlaylistDTO> getAllPlaylists() {
+        return playlistRepository.findAll().stream()
+                .map(PlaylistDTO::new)
+                .collect(Collectors.toList());
     }
 
-    public Optional<Playlist> getPlaylistById(Long id) {
-        return playlistRepository.findById(id);
+    @Cacheable(value = "playlist", key = "#id", unless = "#result == null")
+    public PlaylistDTO getPlaylistById(Long id) {
+        return playlistRepository.findById(id).map(PlaylistDTO::new).orElse(null);
     }
 
-    public Playlist createPlaylist(PlaylistRequestDTO dto) {
-        // Lấy userId từ SecurityContext — không tin tưởng client
+    @CacheEvict(value = {"playlistsList", "userPlaylists"}, allEntries = true)
+    public PlaylistDTO createPlaylist(PlaylistRequestDTO dto) {
         CustomUserDetails principal = (CustomUserDetails) SecurityContextHolder
                 .getContext().getAuthentication().getPrincipal();
         Long userId = principal.getUser().getId();
 
         Playlist playlist = new Playlist(dto.getName(), userId, LocalDateTime.now());
-        return playlistRepository.save(playlist);
+        return new PlaylistDTO(playlistRepository.save(playlist));
     }
 
-    public Optional<Playlist> updatePlaylist(Long id, PlaylistRequestDTO dto) {
+    @CacheEvict(value = {"playlistsList", "userPlaylists"}, allEntries = true)
+    @CachePut(value = "playlist", key = "#id", unless = "#result == null")
+    public PlaylistDTO updatePlaylist(Long id, PlaylistRequestDTO dto) {
         return playlistRepository.findById(id)
                 .map(playlist -> {
-                    // Chỉ cho phép cập nhật name — không thể thay đổi userId hay createdAt
                     playlist.setName(dto.getName());
-                    return playlistRepository.save(playlist);
-                });
+                    return new PlaylistDTO(playlistRepository.save(playlist));
+                })
+                .orElse(null);
     }
 
     @Transactional
+    @CacheEvict(value = {"playlist", "playlistsList", "userPlaylists"}, allEntries = true)
     public boolean deletePlaylist(Long id) {
         return playlistRepository.findById(id)
                 .map(playlist -> {
@@ -70,27 +80,27 @@ public class PlaylistService {
     }
 
     @Transactional
+    @CacheEvict(value = {"playlist", "playlistsList", "userPlaylists"}, allEntries = true)
     public void deactivatePlaylistsByUserId(Long userId) {
-        // Soft delete: ẩn playlist, không xóa dự liệu
         playlistRepository.deactivateByUserId(userId);
     }
 
-    /**
-     * @deprecated Sử dụng deactivatePlaylistsByUserId() thay thế
-     */
     @Deprecated
     @Transactional
     public void deletePlaylistsByUserId(Long userId) {
         deactivatePlaylistsByUserId(userId);
     }
 
-    public List<Playlist> getPlaylistsByUser(Long userId) {
-        return playlistRepository.findByUserIdAndActiveTrue(userId);
+    @Cacheable(value = "userPlaylists", key = "#userId")
+    public List<PlaylistDTO> getPlaylistsByUser(Long userId) {
+        return playlistRepository.findByUserIdAndActiveTrue(userId).stream()
+                .map(PlaylistDTO::new)
+                .collect(Collectors.toList());
     }
 
     @Transactional
-    public Playlist addSongToPlaylist(Long playlistId, Long songId) {
-        // Tìm song av playlist
+    @CacheEvict(value = {"playlist", "playlistsList", "userPlaylists"}, allEntries = true)
+    public PlaylistDTO addSongToPlaylist(Long playlistId, Long songId) {
         Playlist playlist = playlistRepository.findById(playlistId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy Playlist"));
 
@@ -101,8 +111,9 @@ public class PlaylistService {
             PlaylistSong mapping = new PlaylistSong(
                     playlistId, songId, LocalDateTime.now());
             playlistSongRepository.save(mapping);
+            // Refresh playlist to get latest songs mapping if needed or handled by JPA
         }
-        return playlist;
+        return new PlaylistDTO(playlist);
     }
 
     public boolean isOwner(Long playlistId, Long userId) {

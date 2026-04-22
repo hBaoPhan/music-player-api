@@ -8,6 +8,7 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import jakarta.transaction.Transactional;
 
@@ -42,6 +43,9 @@ public class UserService {
     @Autowired
     private UserHistorySongRepository userHistorySongRepository;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     public List<User> getAllUsers() {
         return userRepository.findAllByActiveTrue();
     }
@@ -62,7 +66,7 @@ public class UserService {
                     }
 
                     if (userDetails.getPassword() != null && !userDetails.getPassword().isEmpty()) {
-                        user.setPassword(userDetails.getPassword());
+                        user.setPassword(passwordEncoder.encode(userDetails.getPassword()));
                     }
 
                     if (userDetails.getEmail() != null && !userDetails.getEmail().trim().isEmpty()) {
@@ -73,9 +77,6 @@ public class UserService {
                         user.setRole(userDetails.getRole());
                     }
 
-                    if (userDetails.getPlaylists() != null) {
-                        user.setPlaylists(userDetails.getPlaylists());
-                    }
                     return userRepository.save(user);
                 });
     }
@@ -156,5 +157,11 @@ public class UserService {
         }
         UserHistorySong history = new UserHistorySong(userId, songId, LocalDateTime.now(), duration);
         userHistorySongRepository.save(history);
+    }
+
+    public boolean isOwner(Long userId, String principal) {
+        return userRepository.findByIdAndActiveTrue(userId)
+                .map(user -> user.getUsername().equals(principal))
+                .orElse(false);
     }
 }

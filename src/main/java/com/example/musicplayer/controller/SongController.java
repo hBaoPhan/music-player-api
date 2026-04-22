@@ -31,33 +31,33 @@ public class SongController {
 
     @GetMapping
     public List<SongDTO> getAllSongs() {
-        return songService.getAllSongs().stream()
-                .map(SongDTO::new)
-                .collect(Collectors.toList());
+        return songService.getAllSongs();
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<SongDTO> getSongById(@PathVariable Long id) {
-        return songService.getSongById(id)
-                .map(SongDTO::new)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        SongDTO song = songService.getSongById(id);
+        if (song != null) {
+            return ResponseEntity.ok(song);
+        }
+        return ResponseEntity.notFound().build();
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<SongDTO> createSong(@RequestBody Song song) {
-        Song savedSong = songService.createSong(song);
-        return ResponseEntity.status(HttpStatus.CREATED).body(new SongDTO(savedSong));
+        SongDTO savedSong = songService.createSong(song);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedSong);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<SongDTO> updateSong(@PathVariable Long id, @RequestBody Song songDetails) {
-        return songService.updateSong(id, songDetails)
-                .map(SongDTO::new)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        SongDTO updatedSong = songService.updateSong(id, songDetails);
+        if (updatedSong != null) {
+            return ResponseEntity.ok(updatedSong);
+        }
+        return ResponseEntity.notFound().build();
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -71,22 +71,16 @@ public class SongController {
 
     @GetMapping("/artist/{artistId}")
     public List<SongDTO> getSongsByArtist(@PathVariable Long artistId) {
-        return songService.getSongsByArtist(artistId).stream()
-                .map(SongDTO::new)
-                .collect(Collectors.toList());
+        return songService.getSongsByArtist(artistId);
     }
 
     @GetMapping("/album/{albumId}")
     public List<SongDTO> getSongsByAlbum(@PathVariable Long albumId) {
-        return songService.getSongsByAlbum(albumId).stream()
-                .map(SongDTO::new)
-                .collect(Collectors.toList());
+        return songService.getSongsByAlbum(albumId);
     }
 
     @GetMapping("/title/{title}")
     public List<SongDTO> getSongsByTitle(@PathVariable String title) {
-        return songService.getSongsByTitle(title).stream()
-                .map(SongDTO::new)
-                .collect(Collectors.toList());
+        return songService.getSongsByTitle(title);
     }
 }
