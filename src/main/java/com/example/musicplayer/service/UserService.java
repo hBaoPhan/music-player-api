@@ -1,10 +1,9 @@
 package com.example.musicplayer.service;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
+import com.example.musicplayer.dto.UserHistorySongDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -93,14 +92,14 @@ public class UserService {
                 .orElse(false);
     }
 
-    @Transactional
-    public void reactivateUser(Long id) {
-        userRepository.findById(id).ifPresent(user -> {
-            user.setActive(true);
-            userRepository.save(user);
-            playlistRepository.reactivateByUserId(id);
-        });
-    }
+//    @Transactional
+//    public void reactivateUser(Long id) {
+//        userRepository.findById(id).ifPresent(user -> {
+//            user.setActive(true);
+//            userRepository.save(user);
+//            playlistRepository.reactivateByUserId(id);
+//        });
+//    }
 
     public User findByUsername(String username) {
         return userRepository.findByUsername(username).orElseThrow(() -> {
@@ -129,10 +128,9 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
-    public List<UserHistorySong> getHistorySong(Long userId) {
-        Set<Long> seenSongIds = new HashSet<>();
-        return userHistorySongRepository.findByUserIdOrderByListenedAtDesc(userId).stream()
-                .filter(history -> seenSongIds.add(history.getSongId()))
+    public List<UserHistorySongDTO> getHistorySong(Long userId) {
+        return userHistorySongRepository.findUniqueDailyHistoryByUserId(userId).stream()
+                .map(UserHistorySongDTO::new)
                 .collect(Collectors.toList());
     }
 

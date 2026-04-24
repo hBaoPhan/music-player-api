@@ -30,7 +30,6 @@ import com.example.musicplayer.dto.UserHistorySongDTO;
 import com.example.musicplayer.entity.Role;
 import com.example.musicplayer.entity.Song;
 import com.example.musicplayer.entity.User;
-import com.example.musicplayer.entity.UserHistorySong;
 import com.example.musicplayer.service.PlaylistService;
 import com.example.musicplayer.service.UserService;
 import com.example.musicplayer.security.JwtTokenProvider;
@@ -179,11 +178,8 @@ public class UserController {
     @PreAuthorize("hasRole('ADMIN') or @userService.isOwner(#userId, principal.username)")
     public ResponseEntity<?> getHistorySong(@PathVariable Long userId) {
         try {
-            List<UserHistorySong> history = userService.getHistorySong(userId);
-            List<UserHistorySongDTO> historyDtos = history.stream()
-                    .map(UserHistorySongDTO::new)
-                    .collect(Collectors.toList());
-            return ResponseEntity.ok(historyDtos);
+            List<UserHistorySongDTO> history = userService.getHistorySong(userId);
+            return ResponseEntity.ok(history);
         } catch (Exception e) {
             return ResponseEntity.notFound().build();
         }

@@ -32,5 +32,5 @@ build/
 ### VS Code ###
 .vscode/
 
-.aiassistant
-rules.md
+/.aiassistant/
+.aiassistant/rules/rules.md

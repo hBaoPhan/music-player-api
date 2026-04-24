@@ -14,7 +14,17 @@ import com.example.musicplayer.entity.UserHistorySong;
 
 @Repository
 public interface UserHistorySongRepository extends JpaRepository<UserHistorySong, Long> {
-    List<UserHistorySong> findByUserIdOrderByListenedAtDesc(Long userId);
+
+    @Query("SELECT h FROM UserHistorySong h " +
+            "WHERE h.userId = :userId " +
+            "AND h.listenedAt = (" +
+            "   SELECT MAX(h2.listenedAt) FROM UserHistorySong h2 " +
+            "   WHERE h2.userId = h.userId " +
+            "   AND h2.song = h.song " +
+            "   AND FUNCTION('date', h2.listenedAt) = FUNCTION('date', h.listenedAt)" +
+            ") " +
+            "ORDER BY h.listenedAt DESC")
+    List<UserHistorySong> findUniqueDailyHistoryByUserId(@Param("userId") Long userId);
 
     @Query("SELECT h.song FROM UserHistorySong h " +
             "WHERE h.userId = :userId " +
