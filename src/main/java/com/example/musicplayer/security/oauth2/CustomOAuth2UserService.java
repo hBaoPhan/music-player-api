@@ -5,10 +5,10 @@ import com.example.musicplayer.entity.CustomUserDetails;
 import com.example.musicplayer.entity.Role;
 import com.example.musicplayer.entity.User;
 import com.example.musicplayer.repository.UserRepository;
-import com.example.musicplayer.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
+import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
@@ -18,9 +18,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     @Autowired
     private UserRepository userRepository;
-
-    @Autowired
-    private UserService userService;
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
@@ -32,17 +29,14 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             throw new OAuth2AuthenticationException("Email không tồn tại từ OAuth2");
         }
 
+
         User user = userRepository.findByEmail(email);
 
-        boolean wasReactivated = false;
-
+        if (user != null && !user.isActive()) {
+            throw new OAuth2AuthenticationException(new OAuth2Error("account_locked", "Tài khoản đã bị khóa", null));
+        }
+        
         if (user != null) {
-
-            if (!user.isActive()) {
-                userService.reactivateUser(user.getId());
-                user.setActive(true);
-                wasReactivated = true;
-            }
             if (user.getProvider() != AuthProvider.GOOGLE) {
                 user.setProvider(AuthProvider.GOOGLE);
                 userRepository.save(user);
@@ -64,6 +58,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             user = userRepository.save(user);
         }
 
-        return new CustomUserDetails(user, oAuth2User.getAttributes(), wasReactivated);
+        return new CustomUserDetails(user, oAuth2User.getAttributes());
     }
 }

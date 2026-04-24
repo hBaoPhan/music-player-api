@@ -21,11 +21,13 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import com.example.musicplayer.dto.PlaylistDTO;
 import com.example.musicplayer.dto.SongDTO;
 import com.example.musicplayer.dto.UserDTO;
 import com.example.musicplayer.dto.UserHistorySongDTO;
+import com.example.musicplayer.entity.Role;
 import com.example.musicplayer.entity.Song;
 import com.example.musicplayer.entity.User;
 import com.example.musicplayer.entity.UserHistorySong;
@@ -57,7 +59,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or @userService.isOwner(#id, principal)")
+    @PreAuthorize("hasRole('ADMIN') or @userService.isOwner(#id, principal.username)")
     public ResponseEntity<UserDTO> getUserById(@PathVariable Long id) {
         return userService.getUserById(id)
                 .map(UserDTO::new)
@@ -73,7 +75,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or @userService.isOwner(#id, principal)")
+    @PreAuthorize("hasRole('ADMIN') or @userService.isOwner(#id, principal.username)")
     public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody User userDetails,
             Authentication authentication) {
         boolean isAdmin = authentication.getAuthorities()
@@ -102,21 +104,21 @@ public class UserController {
             return ResponseEntity.badRequest().body("Role không được để trống.");
         }
 
-        com.example.musicplayer.entity.Role newRole;
+        Role newRole;
         try {
-            newRole = com.example.musicplayer.entity.Role.valueOf(roleStr.toUpperCase());
+            newRole = Role.valueOf(roleStr.toUpperCase());
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body("Role không hợp lệ: " + roleStr);
         }
 
-        org.springframework.security.core.userdetails.UserDetails principal = (org.springframework.security.core.userdetails.UserDetails) authentication
+        UserDetails principal = (UserDetails) authentication
                 .getPrincipal();
-        com.example.musicplayer.entity.User caller = userService.findByUsername(principal.getUsername());
+        User caller = userService.findByUsername(principal.getUsername());
         if (caller.getId().equals(id)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Bạn không thể thay đổi role của chính mình.");
         }
 
-        com.example.musicplayer.entity.Role finalNewRole = newRole;
+        Role finalNewRole = newRole;
         User dummy = new User();
         dummy.setRole(finalNewRole);
         return userService.updateUser(id, dummy, true)
@@ -149,7 +151,7 @@ public class UserController {
     }
 
     @GetMapping("/{userId}/favorites")
-    @PreAuthorize("hasRole('ADMIN') or @userService.isOwner(#userId, principal)")
+    @PreAuthorize("hasRole('ADMIN') or @userService.isOwner(#userId, principal.username)")
     public ResponseEntity<List<SongDTO>> getFavoriteSongs(@PathVariable Long userId) {
         try {
             List<Song> favorites = userService.getFavoriteSongs(userId);
@@ -163,7 +165,7 @@ public class UserController {
     }
 
     @PostMapping("/{userId}/favorites/{songId}")
-    @PreAuthorize("hasRole('ADMIN') or @userService.isOwner(#userId, principal)")
+    @PreAuthorize("hasRole('ADMIN') or @userService.isOwner(#userId, principal.username)")
     public ResponseEntity<?> toggleFavorite(@PathVariable Long userId, @PathVariable Long songId) {
         try {
             userService.toggleFavorite(userId, songId);
@@ -174,7 +176,7 @@ public class UserController {
     }
 
     @GetMapping("/{userId}/history")
-    @PreAuthorize("hasRole('ADMIN') or @userService.isOwner(#userId, principal)")
+    @PreAuthorize("hasRole('ADMIN') or @userService.isOwner(#userId, principal.username)")
     public ResponseEntity<?> getHistorySong(@PathVariable Long userId) {
         try {
             List<UserHistorySong> history = userService.getHistorySong(userId);
@@ -188,7 +190,7 @@ public class UserController {
     }
 
     @PostMapping("/{userId}/history/{songId}")
-    @PreAuthorize("hasRole('ADMIN') or @userService.isOwner(#userId, principal)")
+    @PreAuthorize("hasRole('ADMIN') or @userService.isOwner(#userId, principal.username)")
     public ResponseEntity<?> addHistorySong(
             @PathVariable Long userId,
             @PathVariable Long songId,
@@ -202,7 +204,7 @@ public class UserController {
     }
 
     @GetMapping("/{userId}/history/top-this-month")
-    @PreAuthorize("hasRole('ADMIN') or @userService.isOwner(#userId, principal)")
+    @PreAuthorize("hasRole('ADMIN') or @userService.isOwner(#userId, principal.username)")
     public ResponseEntity<List<SongDTO>> getTopSongsThisMonth(@PathVariable Long userId) {
         try {
             List<Song> songs = userService.getTopSongsThisMonth(userId);

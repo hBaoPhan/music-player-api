@@ -46,7 +46,7 @@ public class PlaylistService {
         return playlistRepository.findById(id).map(PlaylistDTO::new).orElse(null);
     }
 
-    @CacheEvict(value = {"playlistsList", "userPlaylists"}, allEntries = true)
+    @CacheEvict(value = { "playlistsList", "userPlaylists" }, allEntries = true)
     public PlaylistDTO createPlaylist(PlaylistRequestDTO dto) {
         CustomUserDetails principal = (CustomUserDetails) SecurityContextHolder
                 .getContext().getAuthentication().getPrincipal();
@@ -56,7 +56,7 @@ public class PlaylistService {
         return new PlaylistDTO(playlistRepository.save(playlist));
     }
 
-    @CacheEvict(value = {"playlistsList", "userPlaylists"}, allEntries = true)
+    @CacheEvict(value = { "playlistsList", "userPlaylists" }, allEntries = true)
     @CachePut(value = "playlist", key = "#id", unless = "#result == null")
     public PlaylistDTO updatePlaylist(Long id, PlaylistRequestDTO dto) {
         return playlistRepository.findById(id)
@@ -68,7 +68,7 @@ public class PlaylistService {
     }
 
     @Transactional
-    @CacheEvict(value = {"playlist", "playlistsList", "userPlaylists"}, allEntries = true)
+    @CacheEvict(value = { "playlist", "playlistsList", "userPlaylists" }, allEntries = true)
     public boolean deletePlaylist(Long id) {
         return playlistRepository.findById(id)
                 .map(playlist -> {
@@ -80,7 +80,7 @@ public class PlaylistService {
     }
 
     @Transactional
-    @CacheEvict(value = {"playlist", "playlistsList", "userPlaylists"}, allEntries = true)
+    @CacheEvict(value = { "playlist", "playlistsList", "userPlaylists" }, allEntries = true)
     public void deactivatePlaylistsByUserId(Long userId) {
         playlistRepository.deactivateByUserId(userId);
     }
@@ -99,7 +99,7 @@ public class PlaylistService {
     }
 
     @Transactional
-    @CacheEvict(value = {"playlist", "playlistsList", "userPlaylists"}, allEntries = true)
+    @CacheEvict(value = { "playlist", "playlistsList", "userPlaylists" }, allEntries = true)
     public PlaylistDTO addSongToPlaylist(Long playlistId, Long songId) {
         Playlist playlist = playlistRepository.findById(playlistId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy Playlist"));
@@ -111,7 +111,6 @@ public class PlaylistService {
             PlaylistSong mapping = new PlaylistSong(
                     playlistId, songId, LocalDateTime.now());
             playlistSongRepository.save(mapping);
-            // Refresh playlist to get latest songs mapping if needed or handled by JPA
         }
         return new PlaylistDTO(playlist);
     }

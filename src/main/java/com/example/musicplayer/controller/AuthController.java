@@ -1,5 +1,6 @@
 package com.example.musicplayer.controller;
 
+import com.example.musicplayer.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -25,8 +26,8 @@ import com.example.musicplayer.entity.User;
 import com.example.musicplayer.repository.UserRepository;
 import com.example.musicplayer.security.JwtTokenProvider;
 import com.example.musicplayer.service.EmailService;
-import com.example.musicplayer.service.UserService;
 
+import java.util.Map;
 import java.util.Random;
 
 @RestController
@@ -47,7 +48,6 @@ public class AuthController {
 
     @Autowired
     private EmailService emailService;
-
     @Autowired
     private UserService userService;
 
@@ -56,13 +56,23 @@ public class AuthController {
 
         String usernameOrEmail = loginRequest.getUsername();
         String resolvedUsername = usernameOrEmail;
+        User user;
 
         if (usernameOrEmail.contains("@")) {
-            User user = userRepository.findByEmail(usernameOrEmail);
+            user = userRepository.findByEmail(usernameOrEmail);
             if (user == null) {
                 return ResponseEntity.badRequest().body("Lỗi: Không tìm thấy tài khoản với email này!");
             }
             resolvedUsername = user.getUsername();
+        } else {
+            user = userRepository.findByUsername(usernameOrEmail).orElse(null);
+        }
+
+        if (user != null && !user.isActive()) {
+            return ResponseEntity.status(403).body(Map.of(
+                    "code", "account_locked",
+                    "message", "Tài khoản đã bị khóa. Vui lòng liên hệ quản trị viên."
+            ));
         }
 
         AuthenticationManager authenticationManager = authenticationConfiguration.getAuthenticationManager();
@@ -74,16 +84,9 @@ public class AuthController {
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        User loggedInUser = userRepository.findByUsername(resolvedUsername).orElse(null);
-        boolean wasReactivated = false;
-        if (loggedInUser != null && !loggedInUser.isActive()) {
-            userService.reactivateUser(loggedInUser.getId());
-            wasReactivated = true;
-        }
-
         String jwt = tokenProvider.generateToken(authentication);
         String refreshToken = tokenProvider.generateRefreshTokenFromUsername(resolvedUsername);
-        return ResponseEntity.ok(new JwtResponse(jwt, refreshToken, wasReactivated));
+        return ResponseEntity.ok(new JwtResponse(jwt, refreshToken));
     }
 
     @PostMapping("/register")
@@ -167,7 +170,7 @@ public class AuthController {
                 String newAccessToken = tokenProvider.generateTokenFromUsername(username);
                 String newRefreshToken = tokenProvider.generateRefreshTokenFromUsername(username);
 
-                return ResponseEntity.ok(new JwtResponse(newAccessToken, newRefreshToken, false));
+                return ResponseEntity.ok(new JwtResponse(newAccessToken, newRefreshToken));
             }
         }
         return ResponseEntity.badRequest().body("Lỗi: Refresh Token không hợp lệ hoặc đã hết hạn!");
