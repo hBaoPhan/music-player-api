@@ -13,13 +13,13 @@ public class EmailService {
 
     public void sendTemporaryPassword(String toEmail, String temporaryPassword) {
         SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom("noreply@spotifour.com");
+        message.setFrom("baophan2929@gmail.com");
         message.setTo(toEmail);
         message.setSubject("Mật khẩu tạm thời cho tài khoản SPOTIFOUR của bạn");
         message.setText("Bạn đã yêu cầu khôi phục mật khẩu.\n\n"
-                      + "Mật khẩu tạm thời của bạn là: " + temporaryPassword + "\n\n"
-                      + "Vui lòng đăng nhập lại và thay đổi mật khẩu của bạn ngay sau khi truy cập.");
-        
+                + "Mật khẩu tạm thời của bạn là: " + temporaryPassword + "\n\n"
+                + "Vui lòng đăng nhập lại và thay đổi mật khẩu của bạn ngay sau khi truy cập.");
+
         mailSender.send(message);
     }
 }
