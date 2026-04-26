@@ -71,8 +71,7 @@ public class AuthController {
         if (user != null && !user.isActive()) {
             return ResponseEntity.status(403).body(Map.of(
                     "code", "account_locked",
-                    "message", "Tài khoản đã bị khóa. Vui lòng liên hệ quản trị viên."
-            ));
+                    "message", "Tài khoản đã bị khóa. Vui lòng liên hệ hỗ trợ."));
         }
 
         AuthenticationManager authenticationManager = authenticationConfiguration.getAuthenticationManager();

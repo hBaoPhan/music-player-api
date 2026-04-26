@@ -29,13 +29,13 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             throw new OAuth2AuthenticationException("Email không tồn tại từ OAuth2");
         }
 
-
         User user = userRepository.findByEmail(email);
 
         if (user != null && !user.isActive()) {
-            throw new OAuth2AuthenticationException(new OAuth2Error("account_locked", "Tài khoản đã bị khóa", null));
+            throw new OAuth2AuthenticationException(
+                    new OAuth2Error("account_locked", "Tài khoản đã bị khóa. Vui lòng liên hệ hỗ trợ.", null));
         }
-        
+
         if (user != null) {
             if (user.getProvider() != AuthProvider.GOOGLE) {
                 user.setProvider(AuthProvider.GOOGLE);

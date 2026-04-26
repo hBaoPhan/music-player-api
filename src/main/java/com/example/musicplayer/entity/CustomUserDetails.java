@@ -62,12 +62,12 @@ public class CustomUserDetails implements UserDetails, OAuth2User {
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return user.isActive();
     }
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return user.isActive();
     }
     
     public User getUser() {

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 @Component
 public class OAuth2AuthenticationFailureHandler extends SimpleUrlAuthenticationFailureHandler {
@@ -21,11 +22,12 @@ public class OAuth2AuthenticationFailureHandler extends SimpleUrlAuthenticationF
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
             AuthenticationException exception) throws IOException, ServletException {
+
         String errorCode = "oauth2_authentication_failed";
         String errorMessage = exception.getLocalizedMessage();
-        boolean active = true;
 
-        if (exception instanceof OAuth2AuthenticationException oauth2Exception && oauth2Exception.getError() != null) {
+        if (exception instanceof OAuth2AuthenticationException oauth2Exception
+                && oauth2Exception.getError() != null) {
             if (oauth2Exception.getError().getErrorCode() != null) {
                 errorCode = oauth2Exception.getError().getErrorCode();
             }
@@ -34,14 +36,12 @@ public class OAuth2AuthenticationFailureHandler extends SimpleUrlAuthenticationF
             }
         }
 
-        if ("account_locked".equals(errorCode)) {
-            active = false;
-        }
-
         String targetUrl = UriComponentsBuilder.fromUriString(frontendRedirectUrl.replace("/oauth2/redirect", "/login"))
                 .queryParam("code", errorCode)
                 .queryParam("message", errorMessage)
-                .build().toUriString();
+                .build()
+                .encode(StandardCharsets.UTF_8)
+                .toUriString();
 
         getRedirectStrategy().sendRedirect(request, response, targetUrl);
     }
