@@ -119,7 +119,11 @@ public class UserService {
         userFavoriteRepository.findByUserIdAndSongId(userId, songId)
                 .ifPresentOrElse(
                         userFavoriteRepository::delete,
-                        () -> userFavoriteRepository.save(new UserFavorite(userId, songId, LocalDateTime.now())));
+                        () -> {
+                            User userRef = userRepository.getReferenceById(userId);
+                            Song songRef = songRepository.getReferenceById(songId);
+                            userFavoriteRepository.save(new UserFavorite(userRef, songRef, LocalDateTime.now()));
+                        });
     }
 
     public List<Song> getFavoriteSongs(Long userId) {
@@ -153,7 +157,9 @@ public class UserService {
         if (!songRepository.existsById(songId)) {
             throw new RuntimeException("Không tìm thấy Bài hát");
         }
-        UserHistorySong history = new UserHistorySong(userId, songId, LocalDateTime.now(), duration);
+        User userRef = userRepository.getReferenceById(userId);
+        Song songRef = songRepository.getReferenceById(songId);
+        UserHistorySong history = new UserHistorySong(userRef, songRef, LocalDateTime.now(), duration);
         userHistorySongRepository.save(history);
     }
 

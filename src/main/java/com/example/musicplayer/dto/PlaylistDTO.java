@@ -20,7 +20,7 @@ public class PlaylistDTO implements Serializable {
 
     private Long id;
     private String name;
-    private Long userId;
+    private UserDTO user;
     private LocalDateTime createdAt;
     private List<SongDTO> songs;
 
@@ -28,7 +28,12 @@ public class PlaylistDTO implements Serializable {
         if (playlist != null) {
             this.id = playlist.getId();
             this.name = playlist.getName();
-            this.userId = playlist.getUserId();
+            if (playlist.getUser() != null) {
+                this.user = new UserDTO();
+                this.user.setId(playlist.getUser().getId());
+                this.user.setUsername(playlist.getUser().getUsername());
+                this.user.setEmail(playlist.getUser().getEmail());
+            }
             this.createdAt = playlist.getCreatedAt();
             if (playlist.getSongs() != null) {
                 this.songs = playlist.getSongs().stream()

@@ -14,10 +14,10 @@ public interface PlaylistSongRepository extends JpaRepository<PlaylistSong, Long
     boolean existsByPlaylistIdAndSongId(Long playlistId, Long songId);
 
     @Modifying
-    @Query("DELETE FROM PlaylistSong ps WHERE ps.playlistId IN (SELECT p.id FROM Playlist p WHERE p.userId = :userId)")
+    @Query("DELETE FROM PlaylistSong ps WHERE ps.playlist.id IN (SELECT p.id FROM Playlist p WHERE p.user.id = :userId)")
     void deleteByUserId(Long userId);
 
     @Modifying
-    @Query("DELETE FROM PlaylistSong ps WHERE ps.playlistId = :playlistId")
+    @Query("DELETE FROM PlaylistSong ps WHERE ps.playlist.id = :playlistId")
     void deleteByPlaylistId(Long playlistId);
 }

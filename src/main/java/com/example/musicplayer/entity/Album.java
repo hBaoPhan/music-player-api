@@ -7,6 +7,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -32,11 +33,8 @@ public class Album {
     @Column(columnDefinition = "VARCHAR(255)", nullable = false)
     private String title;
 
-    @Column(name = "artist_id", nullable = false)
-    private Long artistId;
-
-    @ManyToOne
-    @JoinColumn(name = "artist_id", insertable = false, updatable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "artist_id", nullable = false)
     private Artist artist;
 
     @Column(name = "cover_url", columnDefinition = "TEXT")
@@ -55,9 +53,9 @@ public class Album {
     @OneToMany(mappedBy = "album")
     private List<Song> songs;
 
-    public Album(String title, Long artistId, String coverUrl, LocalDate releaseDate, AlbumType type) {
+    public Album(String title, Artist artist, String coverUrl, LocalDate releaseDate, AlbumType type) {
         this.title = title;
-        this.artistId = artistId;
+        this.artist = artist;
         this.coverUrl = coverUrl;
         this.releaseDate = releaseDate;
         if (type != null) {

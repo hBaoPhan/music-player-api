@@ -19,7 +19,6 @@ public class AlbumDTO implements Serializable {
 
     private Long id;
     private String title;
-    private Long artistId;
     private ArtistDTO artist;
     private String coverUrl;
     private LocalDate releaseDate;
@@ -29,7 +28,6 @@ public class AlbumDTO implements Serializable {
         if (album != null) {
             this.id = album.getId();
             this.title = album.getTitle();
-            this.artistId = album.getArtistId();
             this.coverUrl = album.getCoverUrl();
             this.releaseDate = album.getReleaseDate();
             this.type = album.getType();

@@ -13,14 +13,19 @@ import lombok.Setter;
 public class UserHistorySongDTO {
 
     private Long id;
-    private Long userId;
+    private UserDTO user;
     private SongDTO song;
     private LocalDateTime listenedAt;
     private Integer durationListened;
 
     public UserHistorySongDTO(UserHistorySong history) {
         this.id = history.getId();
-        this.userId = history.getUserId();
+        if (history.getUser() != null) {
+            this.user = new UserDTO();
+            this.user.setId(history.getUser().getId());
+            this.user.setUsername(history.getUser().getUsername());
+            this.user.setEmail(history.getUser().getEmail());
+        }
         if (history.getSong() != null) {
             this.song = new SongDTO(history.getSong());
         }

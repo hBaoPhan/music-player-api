@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -25,26 +26,20 @@ public class UserFavorite {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "user_id", nullable = false)
-    private Long userId;
-
-    @ManyToOne
-    @JoinColumn(name = "user_id", insertable = false, updatable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(name = "song_id", nullable = false)
-    private Long songId;
-
-    @ManyToOne
-    @JoinColumn(name = "song_id", insertable = false, updatable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "song_id", nullable = false)
     private Song song;
 
     @Column(name = "added_at", nullable = false)
     private LocalDateTime addedAt;
 
-    public UserFavorite(Long userId, Long songId, LocalDateTime addedAt) {
-        this.userId = userId;
-        this.songId = songId;
+    public UserFavorite(User user, Song song, LocalDateTime addedAt) {
+        this.user = user;
+        this.song = song;
         this.addedAt = addedAt;
     }
 }

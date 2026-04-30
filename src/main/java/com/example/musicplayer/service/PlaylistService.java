@@ -18,7 +18,10 @@ import com.example.musicplayer.entity.Playlist;
 import com.example.musicplayer.entity.PlaylistSong;
 import com.example.musicplayer.repository.PlaylistRepository;
 import com.example.musicplayer.repository.PlaylistSongRepository;
+import com.example.musicplayer.entity.User;
+import com.example.musicplayer.entity.Song;
 import com.example.musicplayer.repository.SongRepository;
+import com.example.musicplayer.repository.UserRepository;
 
 import jakarta.transaction.Transactional;
 
@@ -30,6 +33,9 @@ public class PlaylistService {
 
     @Autowired
     private SongRepository songRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired
     private PlaylistSongRepository playlistSongRepository;
@@ -51,8 +57,8 @@ public class PlaylistService {
         CustomUserDetails principal = (CustomUserDetails) SecurityContextHolder
                 .getContext().getAuthentication().getPrincipal();
         Long userId = principal.getUser().getId();
-
-        Playlist playlist = new Playlist(dto.getName(), userId, LocalDateTime.now());
+        User userRef = userRepository.getReferenceById(userId);
+        Playlist playlist = new Playlist(dto.getName(), userRef, LocalDateTime.now());
         return new PlaylistDTO(playlistRepository.save(playlist));
     }
 
@@ -108,8 +114,10 @@ public class PlaylistService {
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy bài hát"));
 
         if (!playlistSongRepository.existsByPlaylistIdAndSongId(playlistId, songId)) {
+            Playlist playlistRef = playlistRepository.getReferenceById(playlistId);
+            Song songRef = songRepository.getReferenceById(songId);
             PlaylistSong mapping = new PlaylistSong(
-                    playlistId, songId, LocalDateTime.now());
+                    playlistRef, songRef, LocalDateTime.now());
             playlistSongRepository.save(mapping);
         }
         return new PlaylistDTO(playlist);
@@ -117,7 +125,7 @@ public class PlaylistService {
 
     public boolean isOwner(Long playlistId, Long userId) {
         return playlistRepository.findById(playlistId)
-                .map(playlist -> playlist.getUserId().equals(userId))
+                .map(playlist -> playlist.getUser().getId().equals(userId))
                 .orElse(false);
     }
 }

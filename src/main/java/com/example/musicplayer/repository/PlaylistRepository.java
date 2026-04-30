@@ -13,10 +13,10 @@ public interface PlaylistRepository extends JpaRepository<Playlist, Long> {
     List<Playlist> findByUserIdAndActiveTrue(Long userId);
 
     @Modifying
-    @Query("UPDATE Playlist p SET p.active = false WHERE p.userId = :userId AND p.active = true")
+    @Query("UPDATE Playlist p SET p.active = false WHERE p.user.id = :userId AND p.active = true")
     void deactivateByUserId(@Param("userId") Long userId);
 
     @Modifying
-    @Query("UPDATE Playlist p SET p.active = true WHERE p.userId = :userId AND p.active = false")
+    @Query("UPDATE Playlist p SET p.active = true WHERE p.user.id = :userId AND p.active = false")
     void reactivateByUserId(@Param("userId") Long userId);
 }

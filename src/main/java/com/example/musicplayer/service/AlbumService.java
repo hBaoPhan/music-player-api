@@ -38,9 +38,6 @@ public class AlbumService {
 
     @CacheEvict(value = {"albumsList", "artistAlbums"}, allEntries = true)
     public AlbumDTO createAlbum(Album album) {
-        if (album.getArtistId() == null && album.getArtist() != null) {
-            album.setArtistId(album.getArtist().getId());
-        }
         return new AlbumDTO(albumRepository.save(album));
     }
 
@@ -52,12 +49,8 @@ public class AlbumService {
                     if (albumDetails.getTitle() != null && !albumDetails.getTitle().isBlank()) {
                         album.setTitle(albumDetails.getTitle());
                     }
-                    Long newArtistId = albumDetails.getArtistId();
-                    if (newArtistId == null && albumDetails.getArtist() != null) {
-                        newArtistId = albumDetails.getArtist().getId();
-                    }
-                    if (newArtistId != null) {
-                        album.setArtistId(newArtistId);
+                    if (albumDetails.getArtist() != null) {
+                        album.setArtist(albumDetails.getArtist());
                     }
                     if (albumDetails.getCoverUrl() != null) {
                         album.setCoverUrl(albumDetails.getCoverUrl());

@@ -32,13 +32,7 @@ public class PlaylistSongService {
         return playlistSongRepository.findById(id)
                 .map(playlistSong -> {
                     playlistSong.setPlaylist(playlistSongDetails.getPlaylist());
-                    if (playlistSongDetails.getPlaylist() != null) {
-                        playlistSong.setPlaylistId(playlistSongDetails.getPlaylist().getId());
-                    }
                     playlistSong.setSong(playlistSongDetails.getSong());
-                    if (playlistSongDetails.getSong() != null) {
-                        playlistSong.setSongId(playlistSongDetails.getSong().getId());
-                    }
                     playlistSong.setAddedAt(playlistSongDetails.getAddedAt());
                     return playlistSongRepository.save(playlistSong);
                 });
