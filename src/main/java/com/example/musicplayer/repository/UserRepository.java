@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.example.musicplayer.entity.User;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,4 +30,19 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByIdAndActiveTrue(Long id);
 
     boolean existsByIdAndActiveTrue(Long id);
+
+    // Dashboard: tổng user active
+    long countByActiveTrue();
+
+    // Dashboard: user đăng ký hôm nay
+    @Query("SELECT COUNT(u) FROM User u WHERE u.createdAt >= :startOfDay AND u.createdAt < :endOfDay")
+    long countNewUsersToday(@Param("startOfDay") LocalDateTime startOfDay, @Param("endOfDay") LocalDateTime endOfDay);
+
+    // Dashboard: đếm user đăng ký mỗi ngày trong 7 ngày gần nhất
+    @Query("SELECT FUNCTION('DATE', u.createdAt) as day, COUNT(u) as cnt " +
+           "FROM User u " +
+           "WHERE u.createdAt >= :since " +
+           "GROUP BY FUNCTION('DATE', u.createdAt) " +
+           "ORDER BY day ASC")
+    List<Object[]> countNewUsersByDaySince(@Param("since") LocalDateTime since);
 }

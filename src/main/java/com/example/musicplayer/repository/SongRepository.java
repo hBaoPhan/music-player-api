@@ -27,4 +27,11 @@ public interface SongRepository extends JpaRepository<Song, Long> {
     @Modifying
     @Query("UPDATE Song s SET s.active = false WHERE s.album.id = :albumId AND s.active = true")
     void deactivateByAlbumId(@Param("albumId") Long albumId);
+
+    // Dashboard: tổng số bài hát active
+    long countByActiveTrue();
+
+    // Dashboard: phân bổ thể loại nhạc
+    @Query("SELECT s.genre, COUNT(s) FROM Song s WHERE s.active = true AND s.genre IS NOT NULL GROUP BY s.genre ORDER BY COUNT(s) DESC")
+    List<Object[]> countSongsByGenre();
 }

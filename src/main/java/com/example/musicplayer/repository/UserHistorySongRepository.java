@@ -1,7 +1,7 @@
 package com.example.musicplayer.repository;
 
-import java.util.List;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -33,4 +33,23 @@ public interface UserHistorySongRepository extends JpaRepository<UserHistorySong
             "ORDER BY COUNT(h) DESC")
     List<Song> findTopSongsThisMonth(@Param("userId") Long userId, @Param("since") LocalDateTime since,
             Pageable pageable);
+
+    // Dashboard: tổng số lượt nghe toàn hệ thống
+    long count();
+
+    // Dashboard: top 10 bài hát được nghe nhiều nhất trong 7 ngày qua
+    @Query("SELECT h.song.id, h.song.title, h.song.artist.name, h.song.album.coverUrl, COUNT(h) as plays " +
+           "FROM UserHistorySong h " +
+           "WHERE h.listenedAt >= :since " +
+           "GROUP BY h.song.id, h.song.title, h.song.artist.name, h.song.album.coverUrl " +
+           "ORDER BY plays DESC")
+    List<Object[]> findTop10TrendingSongsSince(@Param("since") LocalDateTime since, Pageable pageable);
+
+    // Dashboard: lượt nghe mỗi ngày trong 7 ngày gần nhất
+    @Query("SELECT FUNCTION('DATE', h.listenedAt) as day, COUNT(h) as cnt " +
+           "FROM UserHistorySong h " +
+           "WHERE h.listenedAt >= :since " +
+           "GROUP BY FUNCTION('DATE', h.listenedAt) " +
+           "ORDER BY day ASC")
+    List<Object[]> countStreamsByDaySince(@Param("since") LocalDateTime since);
 }
