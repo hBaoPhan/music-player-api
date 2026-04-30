@@ -1,7 +1,6 @@
 package com.example.musicplayer.controller;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,7 +19,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import com.example.musicplayer.dto.PlaylistDTO;
 import com.example.musicplayer.dto.PlaylistRequestDTO;
 import com.example.musicplayer.dto.SongDTO;
-import com.example.musicplayer.entity.Playlist;
 import com.example.musicplayer.service.PlaylistService;
 import com.example.musicplayer.service.PlaylistSongService;
 
@@ -60,7 +58,8 @@ public class PlaylistController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or @playlistService.isOwner(#id, principal.user.id)")
-    public ResponseEntity<PlaylistDTO> updatePlaylist(@PathVariable Long id, @Valid @RequestBody PlaylistRequestDTO dto) {
+    public ResponseEntity<PlaylistDTO> updatePlaylist(@PathVariable Long id,
+            @Valid @RequestBody PlaylistRequestDTO dto) {
         PlaylistDTO updatedPlaylist = playlistService.updatePlaylist(id, dto);
         if (updatedPlaylist != null) {
             return ResponseEntity.ok(updatedPlaylist);
