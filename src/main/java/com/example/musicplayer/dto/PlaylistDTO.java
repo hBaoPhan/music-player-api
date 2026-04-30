@@ -33,6 +33,7 @@ public class PlaylistDTO implements Serializable {
                 this.user.setId(playlist.getUser().getId());
                 this.user.setUsername(playlist.getUser().getUsername());
                 this.user.setEmail(playlist.getUser().getEmail());
+                this.user.setCreatedAt(playlist.getUser().getCreatedAt());
             }
             this.createdAt = playlist.getCreatedAt();
             if (playlist.getSongs() != null) {

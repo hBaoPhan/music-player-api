@@ -25,6 +25,7 @@ public class UserHistorySongDTO {
             this.user.setId(history.getUser().getId());
             this.user.setUsername(history.getUser().getUsername());
             this.user.setEmail(history.getUser().getEmail());
+            this.user.setCreatedAt(history.getUser().getCreatedAt());
         }
         if (history.getSong() != null) {
             this.song = new SongDTO(history.getSong());

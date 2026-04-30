@@ -26,6 +26,7 @@ public class UserDTO implements Serializable {
     private AuthProvider provider;
     private List<PlaylistDTO> playlists;
     private List<SongDTO> favoriteSongs;
+    private java.time.LocalDateTime createdAt;
 
     public UserDTO(User user) {
         if (user != null) {
@@ -34,6 +35,7 @@ public class UserDTO implements Serializable {
             this.email = user.getEmail();
             this.role = user.getRole();
             this.provider = user.getProvider();
+            this.createdAt = user.getCreatedAt();
             if (user.getPlaylists() != null) {
                 this.playlists = user.getPlaylists().stream()
                         .map(PlaylistDTO::new)
