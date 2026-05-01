@@ -27,6 +27,7 @@ import com.example.musicplayer.dto.PlaylistDTO;
 import com.example.musicplayer.dto.SongDTO;
 import com.example.musicplayer.dto.UserDTO;
 import com.example.musicplayer.dto.UserHistorySongDTO;
+import com.example.musicplayer.dto.UserUpdateRequest;
 import com.example.musicplayer.entity.Role;
 import com.example.musicplayer.entity.Song;
 import com.example.musicplayer.entity.User;
@@ -75,17 +76,20 @@ public class UserController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or @userService.isOwner(#id, principal.username)")
-    public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody User userDetails,
-            Authentication authentication) {
-        boolean isAdmin = authentication.getAuthorities()
-                .contains(new SimpleGrantedAuthority("ROLE_ADMIN"));
+    public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody UserUpdateRequest updateRequest) {
+        User userDetails = new User();
+        userDetails.setUsername(updateRequest.getUsername());
+        userDetails.setEmail(updateRequest.getEmail());
 
-        return userService.updateUser(id, userDetails, isAdmin)
+        return userService.updateUser(id, userDetails)
                 .map(user -> {
-                    String newToken = tokenProvider.generateTokenFromUsername(user.getUsername());
+                    String accessToken = tokenProvider.generateTokenFromUsername(user.getUsername());
+                    String refreshToken = tokenProvider.generateRefreshTokenFromUsername(user.getUsername());
+
                     Map<String, Object> response = new HashMap<>();
                     response.put("user", new UserDTO(user));
-                    response.put("token", newToken);
+                    response.put("accessToken", accessToken);
+                    response.put("refreshToken", refreshToken);
                     return ResponseEntity.ok(response);
                 })
                 .orElse(ResponseEntity.notFound().build());
@@ -117,10 +121,7 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Bạn không thể thay đổi role của chính mình.");
         }
 
-        Role finalNewRole = newRole;
-        User dummy = new User();
-        dummy.setRole(finalNewRole);
-        return userService.updateUser(id, dummy, true)
+        return userService.updateRole(id, newRole)
                 .map(u -> ResponseEntity.ok((Object) new UserDTO(u)))
                 .orElse(ResponseEntity.notFound().build());
     }

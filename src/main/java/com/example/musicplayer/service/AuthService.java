@@ -15,6 +15,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Random;
 
@@ -85,6 +86,7 @@ public class AuthService {
         user.setEmail(signUpRequest.getEmail());
         user.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
         user.setRole(Role.USER);
+        user.setCreatedAt(LocalDateTime.now());
 
         userRepository.save(user);
 
@@ -142,9 +144,8 @@ public class AuthService {
                 String username = tokenProvider.getUsernameFromJwt(requestRefreshToken);
 
                 String newAccessToken = tokenProvider.generateTokenFromUsername(username);
-                String newRefreshToken = tokenProvider.generateRefreshTokenFromUsername(username);
 
-                return ResponseEntity.ok(new JwtResponse(newAccessToken, newRefreshToken));
+                return ResponseEntity.ok(new JwtResponse(newAccessToken));
             }
         }
         return ResponseEntity.badRequest().body("Lỗi: Refresh Token không hợp lệ hoặc đã hết hạn!");

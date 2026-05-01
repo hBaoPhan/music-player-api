@@ -11,6 +11,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import jakarta.transaction.Transactional;
 
+import com.example.musicplayer.entity.Role;
 import com.example.musicplayer.entity.Song;
 import com.example.musicplayer.entity.User;
 import com.example.musicplayer.entity.UserFavorite;
@@ -57,7 +58,7 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public Optional<User> updateUser(Long id, User userDetails, boolean isCallerAdmin) {
+    public Optional<User> updateUser(Long id, User userDetails) {
         return userRepository.findById(id)
                 .map(user -> {
                     if (userDetails.getUsername() != null && !userDetails.getUsername().trim().isEmpty()) {
@@ -72,10 +73,15 @@ public class UserService {
                         user.setEmail(userDetails.getEmail());
                     }
 
-                    if (isCallerAdmin && userDetails.getRole() != null) {
-                        user.setRole(userDetails.getRole());
-                    }
+                    return userRepository.save(user);
+                });
+    }
 
+    @Transactional
+    public Optional<User> updateRole(Long id, Role role) {
+        return userRepository.findById(id)
+                .map(user -> {
+                    user.setRole(role);
                     return userRepository.save(user);
                 });
     }
@@ -92,14 +98,14 @@ public class UserService {
                 .orElse(false);
     }
 
-//    @Transactional
-//    public void reactivateUser(Long id) {
-//        userRepository.findById(id).ifPresent(user -> {
-//            user.setActive(true);
-//            userRepository.save(user);
-//            playlistRepository.reactivateByUserId(id);
-//        });
-//    }
+    // @Transactional
+    // public void reactivateUser(Long id) {
+    // userRepository.findById(id).ifPresent(user -> {
+    // user.setActive(true);
+    // userRepository.save(user);
+    // playlistRepository.reactivateByUserId(id);
+    // });
+    // }
 
     public User findByUsername(String username) {
         return userRepository.findByUsername(username).orElseThrow(() -> {
