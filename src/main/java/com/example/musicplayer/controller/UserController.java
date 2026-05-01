@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.example.musicplayer.dto.PlaylistDTO;
@@ -83,7 +82,7 @@ public class UserController {
 
         return userService.updateUser(id, userDetails)
                 .map(user -> {
-                    String accessToken = tokenProvider.generateTokenFromUsername(user.getUsername());
+                    String accessToken = tokenProvider.generateAccessTokenFromUsername(user.getUsername());
                     String refreshToken = tokenProvider.generateRefreshTokenFromUsername(user.getUsername());
 
                     Map<String, Object> response = new HashMap<>();

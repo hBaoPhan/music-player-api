@@ -28,8 +28,8 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             Authentication authentication) throws IOException, ServletException {
         System.out.println(">>> Xác thực OAuth2 thành công. Đang tạo token ... ");
 
-        String token = tokenProvider.generateToken(authentication);
         String username = authentication.getName();
+        String token = tokenProvider.generateAccessTokenFromUsername(username);
         String refreshToken = tokenProvider.generateRefreshTokenFromUsername(username);
 
         boolean wasReactivated = false;

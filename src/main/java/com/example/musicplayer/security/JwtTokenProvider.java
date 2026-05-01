@@ -28,11 +28,7 @@ public class JwtTokenProvider {
         return Keys.hmacShaKeyFor(jwtSecret.getBytes());
     }
 
-    public String generateToken(Authentication authentication) {
-        return generateTokenFromUsername(authentication.getName());
-    }
-
-    public String generateTokenFromUsername(String username) {
+    public String generateAccessTokenFromUsername(String username) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + jwtExpirationMs);
 

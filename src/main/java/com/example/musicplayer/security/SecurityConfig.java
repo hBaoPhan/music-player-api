@@ -93,6 +93,7 @@ public class SecurityConfig {
                                 .authorizeHttpRequests(auth -> auth
                                                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                                                 .requestMatchers("/api/auth/**").permitAll()
+                                                .requestMatchers("/api/ws/**").permitAll()
                                                 .requestMatchers("/error").permitAll()
                                                 .requestMatchers(HttpMethod.GET,
                                                                 "/api/songs", "/api/songs/**",

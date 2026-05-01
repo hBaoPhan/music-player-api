@@ -67,7 +67,7 @@ public class AuthService {
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        String jwt = tokenProvider.generateToken(authentication);
+        String jwt = tokenProvider.generateAccessTokenFromUsername(authentication.getName());
         String refreshToken = tokenProvider.generateRefreshTokenFromUsername(resolvedUsername);
         return ResponseEntity.ok(new JwtResponse(jwt, refreshToken));
     }
@@ -143,7 +143,7 @@ public class AuthService {
             if ("refresh".equals(tokenType)) {
                 String username = tokenProvider.getUsernameFromJwt(requestRefreshToken);
 
-                String newAccessToken = tokenProvider.generateTokenFromUsername(username);
+                String newAccessToken = tokenProvider.generateAccessTokenFromUsername(username);
 
                 return ResponseEntity.ok(new JwtResponse(newAccessToken));
             }
