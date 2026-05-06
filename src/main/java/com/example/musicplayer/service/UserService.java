@@ -133,7 +133,7 @@ public class UserService {
     }
 
     public List<Song> getFavoriteSongs(Long userId) {
-        return userFavoriteRepository.findByUserId(userId).stream()
+        return userFavoriteRepository.findByUserIdOrderByAddedAtDesc(userId).stream()
                 .map(UserFavorite::getSong)
                 .collect(Collectors.toList());
     }

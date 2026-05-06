@@ -134,11 +134,12 @@ public class UserController {
         return ResponseEntity.notFound().build();
     }
 
-    @GetMapping("/{id}/playlists")
-    public ResponseEntity<List<PlaylistDTO>> getUserPlaylists(@PathVariable Long id) {
-        List<PlaylistDTO> userPlaylists = playlistService.getPlaylistsByUser(id);
-        return ResponseEntity.ok(userPlaylists);
-    }
+    // @GetMapping("/{id}/playlists")
+    // public ResponseEntity<List<PlaylistDTO>> getUserPlaylists(@PathVariable Long
+    // id) {
+    // List<PlaylistDTO> userPlaylists = playlistService.getPlaylistsByUser(id);
+    // return ResponseEntity.ok(userPlaylists);
+    // }
 
     @GetMapping("/username/{username}")
     public ResponseEntity<UserDTO> getUserByUsername(@PathVariable String username) {
@@ -164,13 +165,17 @@ public class UserController {
     }
 
     @PostMapping("/{userId}/favorites/{songId}")
-    @PreAuthorize("hasRole('ADMIN') or @userService.isOwner(#userId, principal.username)")
-    public ResponseEntity<?> toggleFavorite(@PathVariable Long userId, @PathVariable Long songId) {
+    @PreAuthorize("@userService.isOwner(#userId, principal.username)")
+    public ResponseEntity<?> toggleFavorite(@PathVariable("userId") Long userId, @PathVariable("songId") Long songId) {
         try {
             userService.toggleFavorite(userId, songId);
-            return ResponseEntity.ok("Đã cập nhật danh sách yêu thích!");
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Đã cập nhật danh sách yêu thích!");
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            Map<String, String> error = new HashMap<>();
+            error.put("error", e.getMessage());
+            return ResponseEntity.badRequest().body(error);
         }
     }
 
@@ -188,14 +193,18 @@ public class UserController {
     @PostMapping("/{userId}/history/{songId}")
     @PreAuthorize("hasRole('ADMIN') or @userService.isOwner(#userId, principal.username)")
     public ResponseEntity<?> addHistorySong(
-            @PathVariable Long userId,
-            @PathVariable Long songId,
+            @PathVariable("userId") Long userId,
+            @PathVariable("songId") Long songId,
             @RequestParam(defaultValue = "0") Integer duration) {
         try {
             userService.addHistorySong(userId, songId, duration);
-            return ResponseEntity.ok("Đã lưu vào lịch sử nghe nhạc!");
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Đã lưu vào lịch sử nghe nhạc!");
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            Map<String, String> error = new HashMap<>();
+            error.put("error", e.getMessage());
+            return ResponseEntity.badRequest().body(error);
         }
     }
 

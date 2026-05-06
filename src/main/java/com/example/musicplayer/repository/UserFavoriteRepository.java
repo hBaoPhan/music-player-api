@@ -12,7 +12,8 @@ import com.example.musicplayer.entity.UserFavorite;
 
 @Repository
 public interface UserFavoriteRepository extends JpaRepository<UserFavorite, Long> {
-    List<UserFavorite> findByUserId(Long userId);
+    @Query("SELECT f FROM UserFavorite f WHERE f.user.id = :userId ORDER BY f.addedAt DESC")
+    List<UserFavorite> findByUserIdOrderByAddedAtDesc(@org.springframework.data.repository.query.Param("userId") Long userId);
 
     Optional<UserFavorite> findByUserIdAndSongId(Long userId, Long songId);
 
@@ -22,8 +23,8 @@ public interface UserFavoriteRepository extends JpaRepository<UserFavorite, Long
 
     // Dashboard: top 10 bài hát được yêu thích nhiều nhất
     @Query("SELECT f.song.id, f.song.title, f.song.artist.name, f.song.album.coverUrl, COUNT(f) as favs " +
-           "FROM UserFavorite f " +
-           "GROUP BY f.song.id, f.song.title, f.song.artist.name, f.song.album.coverUrl " +
-           "ORDER BY favs DESC")
+            "FROM UserFavorite f " +
+            "GROUP BY f.song.id, f.song.title, f.song.artist.name, f.song.album.coverUrl " +
+            "ORDER BY favs DESC")
     List<Object[]> findTop10FavoriteSongs(Pageable pageable);
 }

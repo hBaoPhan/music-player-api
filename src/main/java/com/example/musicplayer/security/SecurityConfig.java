@@ -25,6 +25,10 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import com.example.musicplayer.security.oauth2.CustomOAuth2UserService;
+import com.example.musicplayer.security.oauth2.OAuth2AuthenticationFailureHandler;
+import com.example.musicplayer.security.oauth2.OAuth2AuthenticationSuccessHandler;
+
 import jakarta.servlet.http.HttpServletResponse;
 
 @Configuration
@@ -39,13 +43,13 @@ public class SecurityConfig {
         private JwtAuthenticationFilter jwtAuthenticationFilter;
 
         @Autowired
-        private com.example.musicplayer.security.oauth2.CustomOAuth2UserService customOAuth2UserService;
+        private CustomOAuth2UserService customOAuth2UserService;
 
         @Autowired
-        private com.example.musicplayer.security.oauth2.OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
+        private OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
 
         @Autowired
-        private com.example.musicplayer.security.oauth2.OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler;
+        private OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler;
 
         @Bean
         public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration)
