@@ -157,6 +157,13 @@ public class UserController {
             List<Song> favorites = userService.getFavoriteSongs(userId);
             List<SongDTO> favoriteDTOs = favorites.stream()
                     .map(SongDTO::new)
+                    .collect(Collectors.toMap(
+                            SongDTO::getId,
+                            dto -> dto,
+                            (existing, replacement) -> existing
+                    ))
+                    .values()
+                    .stream()
                     .collect(Collectors.toList());
             return ResponseEntity.ok(favoriteDTOs);
         } catch (Exception e) {
@@ -165,7 +172,7 @@ public class UserController {
     }
 
     @PostMapping("/{userId}/favorites/{songId}")
-    @PreAuthorize("@userService.isOwner(#userId, principal.username)")
+    @PreAuthorize("hasRole('ADMIN') or @userService.isOwner(#userId, principal.username)")
     public ResponseEntity<?> toggleFavorite(@PathVariable("userId") Long userId, @PathVariable("songId") Long songId) {
         try {
             userService.toggleFavorite(userId, songId);

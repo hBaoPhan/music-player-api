@@ -11,6 +11,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -19,7 +20,9 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @Entity
-@Table(name = "user_favorites")
+@Table(name = "user_favorites", uniqueConstraints = {
+    @UniqueConstraint(name = "uk_user_song", columnNames = {"user_id", "song_id"})
+})
 public class UserFavorite {
 
     @Id
