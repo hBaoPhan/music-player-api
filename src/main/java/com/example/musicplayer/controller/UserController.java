@@ -22,7 +22,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import com.example.musicplayer.dto.PlaylistDTO;
 import com.example.musicplayer.dto.SongDTO;
 import com.example.musicplayer.dto.UserDTO;
 import com.example.musicplayer.dto.UserHistorySongDTO;
@@ -30,8 +29,8 @@ import com.example.musicplayer.dto.UserUpdateRequest;
 import com.example.musicplayer.entity.Role;
 import com.example.musicplayer.entity.Song;
 import com.example.musicplayer.entity.User;
-import com.example.musicplayer.service.PlaylistService;
 import com.example.musicplayer.service.UserService;
+import com.example.musicplayer.service.RefreshTokenService;
 import com.example.musicplayer.security.JwtTokenProvider;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -44,7 +43,7 @@ public class UserController {
     private UserService userService;
 
     @Autowired
-    private PlaylistService playlistService;
+    private RefreshTokenService refreshTokenService;
 
     @Autowired
     private JwtTokenProvider tokenProvider;
@@ -76,14 +75,27 @@ public class UserController {
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or @userService.isOwner(#id, principal.username)")
     public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody UserUpdateRequest updateRequest) {
+        User existingUser = userService.getUserById(id).orElse(null);
+        if (existingUser == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        String oldUsername = existingUser.getUsername();
+        String newUsername = updateRequest.getUsername();
+
         User userDetails = new User();
-        userDetails.setUsername(updateRequest.getUsername());
+        userDetails.setUsername(newUsername);
         userDetails.setEmail(updateRequest.getEmail());
 
         return userService.updateUser(id, userDetails)
                 .map(user -> {
+                    // Security: If username changed, invalidate all old tokens
+                    if (newUsername != null && !newUsername.equals(oldUsername)) {
+                        refreshTokenService.deleteAllTokensForUser(oldUsername);
+                    }
+
                     String accessToken = tokenProvider.generateAccessTokenFromUsername(user.getUsername());
-                    String refreshToken = tokenProvider.generateRefreshTokenFromUsername(user.getUsername());
+                    String refreshToken = refreshTokenService.createRefreshToken(user.getUsername());
 
                     Map<String, Object> response = new HashMap<>();
                     response.put("user", new UserDTO(user));
@@ -160,8 +172,7 @@ public class UserController {
                     .collect(Collectors.toMap(
                             SongDTO::getId,
                             dto -> dto,
-                            (existing, replacement) -> existing
-                    ))
+                            (existing, replacement) -> existing))
                     .values()
                     .stream()
                     .collect(Collectors.toList());

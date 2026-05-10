@@ -20,6 +20,9 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     @Autowired
     private JwtTokenProvider tokenProvider;
 
+    @Autowired
+    private com.example.musicplayer.service.RefreshTokenService refreshTokenService;
+
     @Value("${app.frontend.oauth2.redirect.url}")
     private String frontendRedirectUrl;
 
@@ -30,17 +33,11 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
         String username = authentication.getName();
         String token = tokenProvider.generateAccessTokenFromUsername(username);
-        String refreshToken = tokenProvider.generateRefreshTokenFromUsername(username);
-
-        boolean wasReactivated = false;
-        if (authentication.getPrincipal() instanceof CustomUserDetails principal) {
-            wasReactivated = principal.isReactivated();
-        }
+        String refreshToken = refreshTokenService.createRefreshToken(username);
 
         String targetUrl = UriComponentsBuilder.fromUriString(frontendRedirectUrl)
                 .queryParam("token", token)
                 .queryParam("refreshToken", refreshToken)
-                .queryParam("reactivated", wasReactivated)
                 .build().toUriString();
 
         getRedirectStrategy().sendRedirect(request, response, targetUrl);

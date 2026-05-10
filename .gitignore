@@ -34,3 +34,4 @@ build/
 
 /.aiassistant/
 .aiassistant/rules/rules.md
+docker-compose-redis.yml

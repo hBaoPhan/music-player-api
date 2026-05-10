@@ -37,6 +37,9 @@ public class AuthService {
     @Autowired
     private EmailService emailService;
 
+    @Autowired
+    private RefreshTokenService refreshTokenService;
+
     public ResponseEntity<?> authenticateUser(LoginRequest loginRequest) throws Exception {
         String usernameOrEmail = loginRequest.getUsername();
         String resolvedUsername = usernameOrEmail;
@@ -68,7 +71,7 @@ public class AuthService {
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         String jwt = tokenProvider.generateAccessTokenFromUsername(authentication.getName());
-        String refreshToken = tokenProvider.generateRefreshTokenFromUsername(resolvedUsername);
+        String refreshToken = refreshTokenService.createRefreshToken(resolvedUsername);
         return ResponseEntity.ok(new JwtResponse(jwt, refreshToken));
     }
 
@@ -132,22 +135,35 @@ public class AuthService {
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
 
-        return ResponseEntity.ok("Đổi mật khẩu thành công!");
+        // Security: Log out from all devices on password change
+        refreshTokenService.deleteAllTokensForUser(user.getUsername());
+
+        return ResponseEntity.ok("Đổi mật khẩu thành công! Bạn đã được đăng xuất khỏi các thiết bị khác.");
     }
 
     public ResponseEntity<?> refreshToken(RefreshTokenRequest request) {
+        String username = request.getUsername();
         String requestRefreshToken = request.getRefreshToken();
 
-        if (requestRefreshToken != null && tokenProvider.validateToken(requestRefreshToken)) {
-            String tokenType = tokenProvider.getTokenType(requestRefreshToken);
-            if ("refresh".equals(tokenType)) {
-                String username = tokenProvider.getUsernameFromJwt(requestRefreshToken);
-
-                String newAccessToken = tokenProvider.generateAccessTokenFromUsername(username);
-
-                return ResponseEntity.ok(new JwtResponse(newAccessToken));
+        if (username != null && requestRefreshToken != null && refreshTokenService.validateRefreshToken(username, requestRefreshToken)) {
+            // Re-fetch user to ensure permissions are up to date
+            User user = userRepository.findByUsername(username).orElse(null);
+            if (user == null || !user.isActive()) {
+                return ResponseEntity.status(403).body("Lỗi: Người dùng không tồn tại hoặc đã bị khóa!");
             }
+
+            String newAccessToken = tokenProvider.generateAccessTokenFromUsername(username);
+            return ResponseEntity.ok(new JwtResponse(newAccessToken, requestRefreshToken));
         }
-        return ResponseEntity.badRequest().body("Lỗi: Refresh Token không hợp lệ hoặc đã hết hạn!");
+        return ResponseEntity.status(403).body("Lỗi: Refresh Token không hợp lệ hoặc đã hết hạn!");
+    }
+
+    public ResponseEntity<?> logout(LogoutRequest request) {
+        if (request.isAllDevices()) {
+            refreshTokenService.deleteAllTokensForUser(request.getUsername());
+        } else {
+            refreshTokenService.deleteSpecificToken(request.getUsername(), request.getRefreshToken());
+        }
+        return ResponseEntity.ok("Đăng xuất thành công!");
     }
 }
