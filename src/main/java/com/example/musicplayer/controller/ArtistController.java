@@ -19,6 +19,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import com.example.musicplayer.dto.AlbumDTO;
 import com.example.musicplayer.dto.ArtistDTO;
 import com.example.musicplayer.dto.SongDTO;
+import com.example.musicplayer.dto.TrendingArtistDTO;
 import com.example.musicplayer.entity.Artist;
 import com.example.musicplayer.service.AlbumService;
 import com.example.musicplayer.service.ArtistService;
@@ -95,5 +96,11 @@ public class ArtistController {
     @GetMapping("/{id}/songs")
     public ResponseEntity<List<SongDTO>> getArtistSongs(@PathVariable Long id) {
         return ResponseEntity.ok(songService.getSongsByArtist(id));
+    }
+
+    @GetMapping("/trending")
+    public ResponseEntity<List<TrendingArtistDTO>> getTrendingArtists(
+            @org.springframework.web.bind.annotation.RequestParam(defaultValue = "5") int limit) {
+        return ResponseEntity.ok(artistService.getTopTrendingArtists(limit));
     }
 }

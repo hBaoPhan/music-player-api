@@ -52,4 +52,12 @@ public interface UserHistorySongRepository extends JpaRepository<UserHistorySong
            "GROUP BY FUNCTION('DATE', h.listenedAt) " +
            "ORDER BY day ASC")
     List<Object[]> countStreamsByDaySince(@Param("since") LocalDateTime since);
+
+    // Charts: top trending artists by play count (last 7 days)
+    @Query("SELECT h.song.artist.id, h.song.artist.name, h.song.artist.avatarUrl, COUNT(h) as plays " +
+           "FROM UserHistorySong h " +
+           "WHERE h.listenedAt >= :since AND h.song.active = true AND h.song.artist.active = true " +
+           "GROUP BY h.song.artist.id, h.song.artist.name, h.song.artist.avatarUrl " +
+           "ORDER BY plays DESC")
+    List<Object[]> findTopTrendingArtistsSince(@Param("since") LocalDateTime since, Pageable pageable);
 }
