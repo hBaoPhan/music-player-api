@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.security.access.prepost.PreAuthorize;
 
+import com.example.musicplayer.dto.DashboardDTO.GenreDistributionDTO;
+import com.example.musicplayer.dto.DashboardDTO.TrendingSongDTO;
 import com.example.musicplayer.dto.SongDTO;
 import com.example.musicplayer.entity.Song;
 import com.example.musicplayer.service.SongService;
@@ -81,5 +83,20 @@ public class SongController {
     @GetMapping("/title/{title}")
     public List<SongDTO> getSongsByTitle(@PathVariable String title) {
         return songService.getSongsByTitle(title);
+    }
+
+    @GetMapping("/trending")
+    public ResponseEntity<List<TrendingSongDTO>> getTrending() {
+        return ResponseEntity.ok(songService.getTop10Trending());
+    }
+
+    @GetMapping("/top-favorites")
+    public ResponseEntity<List<TrendingSongDTO>> getTopFavorites() {
+        return ResponseEntity.ok(songService.getTop10Favorites());
+    }
+
+    @GetMapping("/genre-stats")
+    public ResponseEntity<List<GenreDistributionDTO>> getGenreStats() {
+        return ResponseEntity.ok(songService.getGenreStats());
     }
 }
