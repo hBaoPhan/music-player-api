@@ -22,9 +22,9 @@ public interface UserFavoriteRepository extends JpaRepository<UserFavorite, Long
     void deleteByUserId(Long userId);
 
     // Dashboard: top 10 bài hát được yêu thích nhiều nhất
-    @Query("SELECT f.song.id, f.song.title, f.song.artist.name, f.song.album.coverUrl, COUNT(f) as favs " +
+    @Query("SELECT f.song.id, f.song.title, f.song.artist.name, f.song.album.coverUrl, COUNT(f) as favs, f.song.audioUrl " +
             "FROM UserFavorite f " +
-            "GROUP BY f.song.id, f.song.title, f.song.artist.name, f.song.album.coverUrl " +
+            "GROUP BY f.song.id, f.song.title, f.song.artist.name, f.song.album.coverUrl, f.song.audioUrl " +
             "ORDER BY favs DESC")
     List<Object[]> findTop10FavoriteSongs(Pageable pageable);
 }

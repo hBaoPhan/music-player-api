@@ -48,6 +48,7 @@ public class DashboardDTO {
         private String artistName;
         private String coverUrl;
         private long playCount;
+        private String audioUrl;
     }
 
     @Getter
@@ -57,5 +58,16 @@ public class DashboardDTO {
     public static class GenreDistributionDTO {
         private String genre;
         private long count;
+    }
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class TrendingArtistDTO {
+        private Long id;
+        private String name;
+        private String avatarUrl;
+        private Long playCount;
     }
 }

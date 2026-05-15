@@ -107,7 +107,8 @@ public class SongService {
                         (String) row[1],
                         row[2] != null ? (String) row[2] : "Unknown",
                         row[3] != null ? (String) row[3] : null,
-                        ((Number) row[4]).longValue()))
+                        ((Number) row[4]).longValue(),
+                        row[5] != null ? (String) row[5] : null))
                 .collect(Collectors.toList());
     }
 
@@ -120,7 +121,8 @@ public class SongService {
                         (String) row[1],
                         row[2] != null ? (String) row[2] : "Unknown",
                         row[3] != null ? (String) row[3] : null,
-                        ((Number) row[4]).longValue()))
+                        ((Number) row[4]).longValue(),
+                        row[5] != null ? (String) row[5] : null))
                 .collect(Collectors.toList());
     }
 

@@ -13,13 +13,15 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 import com.example.musicplayer.dto.AlbumDTO;
 import com.example.musicplayer.dto.ArtistDTO;
+import com.example.musicplayer.dto.DashboardDTO.TrendingArtistDTO;
+import com.example.musicplayer.dto.DashboardDTO.TrendingSongDTO;
 import com.example.musicplayer.dto.SongDTO;
-import com.example.musicplayer.dto.TrendingArtistDTO;
 import com.example.musicplayer.entity.Artist;
 import com.example.musicplayer.service.AlbumService;
 import com.example.musicplayer.service.ArtistService;
@@ -100,7 +102,7 @@ public class ArtistController {
 
     @GetMapping("/trending")
     public ResponseEntity<List<TrendingArtistDTO>> getTrendingArtists(
-            @org.springframework.web.bind.annotation.RequestParam(defaultValue = "5") int limit) {
+            @RequestParam(defaultValue = "5") int limit) {
         return ResponseEntity.ok(artistService.getTopTrendingArtists(limit));
     }
 }

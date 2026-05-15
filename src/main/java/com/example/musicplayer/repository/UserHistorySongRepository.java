@@ -38,10 +38,10 @@ public interface UserHistorySongRepository extends JpaRepository<UserHistorySong
     long count();
 
     // Dashboard: top 10 bài hát được nghe nhiều nhất trong 7 ngày qua
-    @Query("SELECT h.song.id, h.song.title, h.song.artist.name, h.song.album.coverUrl, COUNT(h) as plays " +
+    @Query("SELECT h.song.id, h.song.title, h.song.artist.name, h.song.album.coverUrl, COUNT(h) as plays, h.song.audioUrl " +
            "FROM UserHistorySong h " +
            "WHERE h.listenedAt >= :since " +
-           "GROUP BY h.song.id, h.song.title, h.song.artist.name, h.song.album.coverUrl " +
+           "GROUP BY h.song.id, h.song.title, h.song.artist.name, h.song.album.coverUrl, h.song.audioUrl " +
            "ORDER BY plays DESC")
     List<Object[]> findTop10TrendingSongsSince(@Param("since") LocalDateTime since, Pageable pageable);
 

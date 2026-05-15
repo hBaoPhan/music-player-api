@@ -14,14 +14,15 @@ import jakarta.transaction.Transactional;
 
 import com.example.musicplayer.entity.Artist;
 import com.example.musicplayer.dto.ArtistDTO;
-import com.example.musicplayer.dto.TrendingArtistDTO;
+import com.example.musicplayer.dto.DashboardDTO.TrendingArtistDTO;
+import com.example.musicplayer.dto.DashboardDTO.TrendingSongDTO;
 import com.example.musicplayer.repository.ArtistRepository;
 import com.example.musicplayer.repository.SongRepository;
 import com.example.musicplayer.repository.UserHistorySongRepository;
 
 @Service
 public class ArtistService {
-    
+
     @Autowired
     private ArtistRepository artistRepository;
 
@@ -30,24 +31,24 @@ public class ArtistService {
 
     @Autowired
     private UserHistorySongRepository historyRepository;
-    
+
     @Cacheable(value = "artistsList")
     public List<ArtistDTO> getAllArtists() {
         return artistRepository.findAllByActiveTrue().stream()
                 .map(ArtistDTO::new)
                 .collect(Collectors.toList());
     }
-    
+
     @Cacheable(value = "artist", key = "#id", unless = "#result == null")
     public ArtistDTO getArtistById(Long id) {
         return artistRepository.findById(id).map(ArtistDTO::new).orElse(null);
     }
-    
+
     @CacheEvict(value = "artistsList", allEntries = true)
     public ArtistDTO createArtist(Artist artist) {
         return new ArtistDTO(artistRepository.save(artist));
     }
-    
+
     @CacheEvict(value = "artistsList", allEntries = true)
     @CachePut(value = "artist", key = "#id", unless = "#result == null")
     public ArtistDTO updateArtist(Long id, Artist artistDetails) {
@@ -66,9 +67,9 @@ public class ArtistService {
                 })
                 .orElse(null);
     }
-    
+
     @Transactional
-    @CacheEvict(value = {"artist", "artistsList"}, allEntries = true)
+    @CacheEvict(value = { "artist", "artistsList" }, allEntries = true)
     public boolean deleteArtist(Long id) {
         return artistRepository.findById(id)
                 .map(artist -> {
@@ -80,7 +81,7 @@ public class ArtistService {
                 })
                 .orElse(false);
     }
-    
+
     public ArtistDTO findByName(String name) {
         Artist artist = artistRepository.findByName(name);
         return artist != null ? new ArtistDTO(artist) : null;
@@ -94,8 +95,7 @@ public class ArtistService {
                         ((Number) r[0]).longValue(),
                         (String) r[1],
                         (String) r[2],
-                        ((Number) r[3]).longValue()
-                ))
+                        ((Number) r[3]).longValue()))
                 .collect(Collectors.toList());
     }
 }
