@@ -12,7 +12,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.example.musicplayer.dto.PlaylistDTO;
-import com.example.musicplayer.dto.PlaylistRequestDTO;
+import com.example.musicplayer.dto.PlaylistRequest;
 import com.example.musicplayer.entity.CustomUserDetails;
 import com.example.musicplayer.entity.Playlist;
 import com.example.musicplayer.entity.PlaylistSong;
@@ -53,7 +53,7 @@ public class PlaylistService {
     }
 
     @CacheEvict(value = { "playlistsList", "userPlaylists" }, allEntries = true)
-    public PlaylistDTO createPlaylist(PlaylistRequestDTO dto) {
+    public PlaylistDTO createPlaylist(PlaylistRequest dto) {
         CustomUserDetails principal = (CustomUserDetails) SecurityContextHolder
                 .getContext().getAuthentication().getPrincipal();
         Long userId = principal.getUser().getId();
@@ -64,7 +64,7 @@ public class PlaylistService {
 
     @CacheEvict(value = { "playlistsList", "userPlaylists" }, allEntries = true)
     @CachePut(value = "playlist", key = "#id", unless = "#result == null")
-    public PlaylistDTO updatePlaylist(Long id, PlaylistRequestDTO dto) {
+    public PlaylistDTO updatePlaylist(Long id, PlaylistRequest dto) {
         return playlistRepository.findById(id)
                 .map(playlist -> {
                     playlist.setName(dto.getName());

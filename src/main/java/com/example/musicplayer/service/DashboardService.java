@@ -6,10 +6,13 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.example.musicplayer.dto.DashboardDTO;
@@ -43,29 +46,54 @@ public class DashboardService {
         @Autowired
         private UserPresenceService userPresenceService;
 
+        // Self-inject via @Lazy to route @Async calls through the Spring AOP proxy
+        @Lazy
+        @Autowired
+        private DashboardService self;
+
         private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-        public DashboardDTO getFullDashboard() {
-                LocalDateTime now = LocalDateTime.now();
-                LocalDateTime sevenDaysAgo = now.minusDays(6).withHour(0).withMinute(0).withSecond(0).withNano(0);
-                LocalDate today = LocalDate.now();
-                LocalDateTime startOfDay = today.atStartOfDay();
-                LocalDateTime endOfDay = today.plusDays(1).atStartOfDay();
+        @Async("dashboardExecutor")
+        public CompletableFuture<Long> fetchTotalUsers() {
+                return CompletableFuture.completedFuture(userRepository.countByActiveTrue());
+        }
 
-                long totalUsers = userRepository.countByActiveTrue();
-                long newToday = userRepository.countNewUsersToday(startOfDay, endOfDay);
-                long totalSongs = songRepository.countByActiveTrue();
-                long totalArtists = artistRepository.countByActiveTrue();
-                long totalStreams = userHistorySongRepository.count();
+        @Async("dashboardExecutor")
+        public CompletableFuture<Long> fetchNewUsersToday(LocalDateTime start, LocalDateTime end) {
+                return CompletableFuture.completedFuture(userRepository.countNewUsersToday(start, end));
+        }
 
-                List<DailyCountDTO> userGrowth = buildDailySeries(
-                                userRepository.countNewUsersByDaySince(sevenDaysAgo), sevenDaysAgo, 7);
+        @Async("dashboardExecutor")
+        public CompletableFuture<Long> fetchTotalSongs() {
+                return CompletableFuture.completedFuture(songRepository.countByActiveTrue());
+        }
 
-                List<DailyCountDTO> streamGrowth = buildDailySeries(
-                                userHistorySongRepository.countStreamsByDaySince(sevenDaysAgo), sevenDaysAgo, 7);
+        @Async("dashboardExecutor")
+        public CompletableFuture<Long> fetchTotalArtists() {
+                return CompletableFuture.completedFuture(artistRepository.countByActiveTrue());
+        }
 
-                List<TrendingSongDTO> top10Trending = userHistorySongRepository
-                                .findTop10TrendingSongsSince(sevenDaysAgo, PageRequest.of(0, 10))
+        @Async("dashboardExecutor")
+        public CompletableFuture<Long> fetchTotalStreams() {
+                return CompletableFuture.completedFuture(userHistorySongRepository.count());
+        }
+
+        @Async("dashboardExecutor")
+        public CompletableFuture<List<DailyCountDTO>> fetchUserGrowth(LocalDateTime since) {
+                List<Object[]> raw = userRepository.countNewUsersByDaySince(since);
+                return CompletableFuture.completedFuture(buildDailySeries(raw, since, 7));
+        }
+
+        @Async("dashboardExecutor")
+        public CompletableFuture<List<DailyCountDTO>> fetchStreamGrowth(LocalDateTime since) {
+                List<Object[]> raw = userHistorySongRepository.countStreamsByDaySince(since);
+                return CompletableFuture.completedFuture(buildDailySeries(raw, since, 7));
+        }
+
+        @Async("dashboardExecutor")
+        public CompletableFuture<List<TrendingSongDTO>> fetchTop10Trending(LocalDateTime since) {
+                List<TrendingSongDTO> result = userHistorySongRepository
+                                .findTop10TrendingSongsSince(since, PageRequest.of(0, 10))
                                 .stream()
                                 .map(row -> new TrendingSongDTO(
                                                 ((Number) row[0]).longValue(),
@@ -74,8 +102,12 @@ public class DashboardService {
                                                 row[3] != null ? (String) row[3] : null,
                                                 ((Number) row[4]).longValue()))
                                 .collect(Collectors.toList());
+                return CompletableFuture.completedFuture(result);
+        }
 
-                List<TrendingSongDTO> top10Favorites = userFavoriteRepository
+        @Async("dashboardExecutor")
+        public CompletableFuture<List<TrendingSongDTO>> fetchTop10Favorites() {
+                List<TrendingSongDTO> result = userFavoriteRepository
                                 .findTop10FavoriteSongs(PageRequest.of(0, 10))
                                 .stream()
                                 .map(row -> new TrendingSongDTO(
@@ -85,26 +117,56 @@ public class DashboardService {
                                                 row[3] != null ? (String) row[3] : null,
                                                 ((Number) row[4]).longValue()))
                                 .collect(Collectors.toList());
+                return CompletableFuture.completedFuture(result);
+        }
 
-                List<GenreDistributionDTO> genreDist = songRepository.countSongsByGenre()
+        @Async("dashboardExecutor")
+        public CompletableFuture<List<GenreDistributionDTO>> fetchGenreDistribution() {
+                List<GenreDistributionDTO> result = songRepository.countSongsByGenre()
                                 .stream()
                                 .map(row -> new GenreDistributionDTO(
                                                 row[0] != null ? row[0].toString() : "OTHER",
                                                 ((Number) row[1]).longValue()))
                                 .collect(Collectors.toList());
+                return CompletableFuture.completedFuture(result);
+        }
+
+        public DashboardDTO getFullDashboard() {
+                LocalDateTime now = LocalDateTime.now();
+                LocalDateTime sevenDaysAgo = now.minusDays(6).withHour(0).withMinute(0).withSecond(0).withNano(0);
+                LocalDate today = LocalDate.now();
+                LocalDateTime startOfDay = today.atStartOfDay();
+                LocalDateTime endOfDay = today.plusDays(1).atStartOfDay();
+
+                // Fire all 10 queries concurrently via proxy (required for @Async to work)
+                CompletableFuture<Long> fTotalUsers = self.fetchTotalUsers();
+                CompletableFuture<Long> fNewToday = self.fetchNewUsersToday(startOfDay, endOfDay);
+                CompletableFuture<Long> fTotalSongs = self.fetchTotalSongs();
+                CompletableFuture<Long> fTotalArtists = self.fetchTotalArtists();
+                CompletableFuture<Long> fTotalStreams = self.fetchTotalStreams();
+                CompletableFuture<List<DailyCountDTO>> fUserGrowth = self.fetchUserGrowth(sevenDaysAgo);
+                CompletableFuture<List<DailyCountDTO>> fStreamGrowth = self.fetchStreamGrowth(sevenDaysAgo);
+                CompletableFuture<List<TrendingSongDTO>> fTrending = self.fetchTop10Trending(sevenDaysAgo);
+                CompletableFuture<List<TrendingSongDTO>> fFavorites = self.fetchTop10Favorites();
+                CompletableFuture<List<GenreDistributionDTO>> fGenre = self.fetchGenreDistribution();
+
+                // Wait for all to finish
+                CompletableFuture.allOf(
+                                fTotalUsers, fNewToday, fTotalSongs, fTotalArtists, fTotalStreams,
+                                fUserGrowth, fStreamGrowth, fTrending, fFavorites, fGenre).join();
 
                 return DashboardDTO.builder()
-                                .totalUsers(totalUsers)
+                                .totalUsers(fTotalUsers.join())
                                 .usersOnline(userPresenceService.getOnlineCount())
-                                .newUsersToday(newToday)
-                                .totalSongs(totalSongs)
-                                .totalArtists(totalArtists)
-                                .totalStreams(totalStreams)
-                                .userGrowthLast7Days(userGrowth)
-                                .streamsLast7Days(streamGrowth)
-                                .top10TrendingSongs(top10Trending)
-                                .top10FavoriteSongs(top10Favorites)
-                                .genreDistribution(genreDist)
+                                .newUsersToday(fNewToday.join())
+                                .totalSongs(fTotalSongs.join())
+                                .totalArtists(fTotalArtists.join())
+                                .totalStreams(fTotalStreams.join())
+                                .userGrowthLast7Days(fUserGrowth.join())
+                                .streamsLast7Days(fStreamGrowth.join())
+                                .top10TrendingSongs(fTrending.join())
+                                .top10FavoriteSongs(fFavorites.join())
+                                .genreDistribution(fGenre.join())
                                 .build();
         }
 

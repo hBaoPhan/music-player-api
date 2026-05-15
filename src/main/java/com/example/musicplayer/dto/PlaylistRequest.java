@@ -9,7 +9,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class PlaylistRequestDTO {
+public class PlaylistRequest {
 
     @NotBlank(message = "Tên danh sách phát không được rỗng")
     @Size(max = 255, message = "Tên danh sách phát không được vượt quá 255 kí tự")
