@@ -138,7 +138,11 @@ public class AuthService {
         // Security: Log out from all devices on password change
         refreshTokenService.deleteAllTokensForUser(user.getUsername());
 
-        return ResponseEntity.ok("Đổi mật khẩu thành công! Bạn đã được đăng xuất khỏi các thiết bị khác.");
+        // Generate new tokens for the current session
+        String jwt = tokenProvider.generateAccessTokenFromUsername(user.getUsername());
+        String refreshToken = refreshTokenService.createRefreshToken(user.getUsername());
+
+        return ResponseEntity.ok(new JwtResponse(jwt, refreshToken));
     }
 
     public ResponseEntity<?> refreshToken(RefreshTokenRequest request) {

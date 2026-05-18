@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -45,5 +46,18 @@ public class RefreshTokenService {
     public void deleteAllTokensForUser(String username) {
         String key = USER_TOKENS_KEY_PREFIX + username;
         redisTemplate.delete(key);
+    }
+
+    public void revokeAllTokensExcept(String username, String currentToken) {
+        String key = USER_TOKENS_KEY_PREFIX + username;
+
+        Set<String> allTokens = redisTemplate.opsForSet().members(key);
+        if (allTokens == null || allTokens.isEmpty()) {
+            return;
+        }
+        // Remove every token that is NOT the current one
+        allTokens.stream()
+                .filter(token -> !token.equals(currentToken))
+                .forEach(token -> redisTemplate.opsForSet().remove(key, token));
     }
 }
